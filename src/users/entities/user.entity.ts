@@ -14,26 +14,32 @@ export class User {
   @Column()
   email: string;
 
-  // Otros campos comunes
 }
 
 @Entity()
-export class Buyer extends User {
-  // Campos específicos para el comprador
+export class Reader extends User {
+  @Column()
+  favoriteGenre: string;
+
+  @Column({ type: "text" })
+  bookList: string;
 }
 
 @Entity()
 export class Author extends User {
-  // Campos específicos para el autor
-}
+  @Column()
+  penName: string;
 
-@Entity()
-export class Editorial extends User {
-  // Campos específicos para la editorial
+  @Column()
+  biography: string;
+
+  @Column({ type: "text" })
+  booksWritten: string; 
 }
 
 @Entity()
 export class Admin extends User {
-  // Campos específicos para el admin
+  @Column()
+  accessLevel: number;
 }
 
