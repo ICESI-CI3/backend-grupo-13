@@ -3,9 +3,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Admin, Author, Reader, User } from 'src/users/entities/user.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([User, Reader, Author, Admin]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'SecretKey', 
