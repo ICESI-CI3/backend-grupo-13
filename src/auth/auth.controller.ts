@@ -2,7 +2,7 @@ import { Controller, Post, Body, UnauthorizedException, HttpException, HttpStatu
 import { AuthService } from './auth.service'; 
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
-import bcrypt from "bcrypt";
+import * as bcrypt from 'bcrypt';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +21,7 @@ export class AuthController {
 
     @Post('signup')
     public async signup(@Body() createUserDto: CreateUserDto): Promise<any> {
+        console.log("Intentando registrarse");
     try {
         const userExists = await this.usersService.findByUsername(createUserDto.username);
 
