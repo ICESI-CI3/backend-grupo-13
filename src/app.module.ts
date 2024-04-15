@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import { EbooksModule } from './ebooks/ebooks.module';
 
 
 
@@ -27,7 +28,8 @@ import { join } from 'path';
     }),
     ConfigModule.forRoot({isGlobal: true,}),
     UsersModule, 
-    AuthModule],
+    AuthModule,
+    EbooksModule],
   controllers: [AppController],
   providers: [AppService],
 })
