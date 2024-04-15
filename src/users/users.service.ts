@@ -13,22 +13,27 @@ export class UsersService {
     @InjectRepository(Author)
     private readonly authorsRepository: Repository<Author>,
     @InjectRepository(Admin)
-    private readonly adminsRepository: Repository<Admin>
+    private readonly adminsRepository: Repository<Admin>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>
   ) {}
 
   public async createReader(createReaderDto: CreateReaderDto): Promise<Reader> {
     const newReader = this.readersRepository.create(createReaderDto);
     await this.readersRepository.save(newReader);
+    await this.userRepository.save(newReader);
     return newReader;
   }
   public async createAuthor(createAuthorDto: CreateAuthorDto): Promise<Author> {
     const newAuthor = this.authorsRepository.create(createAuthorDto);
     await this.authorsRepository.save(newAuthor);
+    await this.userRepository.save(newAuthor);
     return newAuthor;
   }
   public async createAdmin(createAdminDto: CreateAdminDto): Promise<Admin> {
     const newAdmin = this.adminsRepository.create(createAdminDto);
     await this.adminsRepository.save(newAdmin);
+    await this.userRepository.save(newAdmin);
     return newAdmin;
   }
   public async findAllReaders(): Promise<Reader[]> {
