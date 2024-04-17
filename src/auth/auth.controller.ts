@@ -19,21 +19,21 @@ export class AuthController {
     return this.authService.login(loginUserDto);
   }
   @UseGuards(AuthGuard('jwt'))
-    @Get('/status')
-    async checkAuthStatus(@Req() req): Promise<{ access_token: string }> {
-        return this.authService.checkAuthStatus(req.user);
-    }
+  @Get('/status')
+  async checkAuthStatus(@Req() req): Promise<{ access_token: string }> {
+      return this.authService.checkAuthStatus(req.user);
+  }
 
-    @UseGuards(AuthGuard('jwt'))
-    @Get('/:id')
-    async getUserById(@Param('id') id: number): Promise<User | undefined> {
-        return this.authService.getUserById(id);
-    }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:id')
+  async getUserById(@Param('id') id: number): Promise<User | undefined> {
+      return this.authService.getUserById(id);
+  }
 
-    @UseGuards(AuthGuard('jwt'))
-    @Get('/')
-    async getAllUsers(): Promise<User[]> {
-        return this.authService.getAllUsers();
-    }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/')
+  async getAllUsers(): Promise<User[]> {
+      return this.authService.getAllUsers();
+  }
   
 }

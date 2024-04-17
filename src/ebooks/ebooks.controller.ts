@@ -5,12 +5,13 @@ import { EbooksService } from './ebooks.service';
 import { Ebook } from './entities/ebook.entity';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { CreateEbookDto } from './dto/create-ebook.dto';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
 
+@UseGuards(AuthGuard('jwt'),RolesGuard)
 @Controller('ebooks')
 export class EbooksController {
   constructor(private readonly ebooksService: EbooksService) {}
 
-  @UseGuards(AuthGuard('jwt'))
   @Post()
   public async create(@Body() createEbookDto: CreateEbookDto): Promise<Ebook> {
     const ebookExists = await this.ebooksService.findByTitle(createEbookDto.title);
@@ -33,7 +34,6 @@ export class EbooksController {
     }
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   public async findById(@Param('id') id: string): Promise<Ebook> {
     const ebook = await this.ebooksService.findById(+id);
@@ -43,7 +43,6 @@ export class EbooksController {
     return ebook;
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateEbookDto): Promise<Ebook> {
     const ebook = await this.ebooksService.findById(+id);
@@ -53,7 +52,6 @@ export class EbooksController {
     return this.ebooksService.update(+id, updateUserDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   public async remove(@Param('id') id: string): Promise<DeleteResult> {
     const ebook = await this.ebooksService.findById(+id);
