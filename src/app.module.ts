@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -26,8 +25,7 @@ import { EbooksModule } from './ebooks/ebooks.module';
       }),
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot({isGlobal: true,}),
-    UsersModule, 
+    ConfigModule.forRoot({isGlobal: true,}), 
     AuthModule,
     EbooksModule],
   controllers: [AppController],
