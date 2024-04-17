@@ -74,3 +74,4 @@ export class UsersController {
     await this.usersService.removeAdmin(+id);
   }
 }
+

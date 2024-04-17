@@ -3,29 +3,35 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { Ebook } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
-import { UsersService } from 'src/users/users.service';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class EbooksService {
   constructor(
     @InjectRepository(Ebook)
     private readonly ebooksRepository: Repository<Ebook>,
-    private readonly usersService: UsersService, 
+    private readonly authService: AuthService
   ) { }
 
   public async create(createEbookDto: CreateEbookDto): Promise<Ebook> {
-    const author = await this.usersService.findAuthorById(createEbookDto.author);
+    const author = await this.authService.getUserByIdAndRole(createEbookDto.author, 'Author');
 
     if (!author) {
-      throw new NotFoundException(`User with ID ${author} not found.`);
+      throw new NotFoundException(`Author with ID ${createEbookDto.author} not found.`);
     }
 
-    const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData)
-    const newEbook = this.ebooksRepository.create({...createEbookDto, author: author, fileData: binaryData});
+    const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
+    const newEbook = this.ebooksRepository.create({
+      ...createEbookDto,
+      author: author, // Asegúrate de que esto coincida con la estructura esperada de la entidad Ebook
+      fileData: binaryData,
+    });
+
     await this.ebooksRepository.save(newEbook);
     return newEbook;
-  }
+}
+
 
   public async findAll(): Promise<Ebook[]> {
     return this.ebooksRepository.find();

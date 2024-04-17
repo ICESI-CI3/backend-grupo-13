@@ -4,9 +4,8 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Admin, Author, Reader, User } from 'src/users/entities/user.entity';
+import { Admin, Author, Reader, User } from 'src/auth/entities/user.entity';
 import { AuthController } from './auth.controller';
-import { UsersModule } from 'src/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
@@ -21,7 +20,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         signOptions: { expiresIn: '60m' },
       }),
     }),
-    UsersModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
