@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
 
-@Entity()
+
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -14,6 +14,9 @@ export class User {
   @Column()
   email: string;
 
+  @Column()
+  role: string; 
+
 }
 
 @Entity()
@@ -23,6 +26,11 @@ export class Reader extends User {
 
   @Column({ type: "text" })
   bookList: string;
+
+  @BeforeInsert()
+  setRole(): void {
+    this.role = 'reader';
+  }
 }
 
 @Entity()
@@ -35,11 +43,21 @@ export class Author extends User {
 
   @Column({ type: "text" })
   booksWritten: string; 
+
+  @BeforeInsert()
+  setRole(): void {
+    this.role = 'author';
+  }
 }
 
 @Entity()
 export class Admin extends User {
   @Column()
   accessLevel: number;
+
+  @BeforeInsert()
+  setRole(): void {
+    this.role = 'admin';
+  }
 }
 

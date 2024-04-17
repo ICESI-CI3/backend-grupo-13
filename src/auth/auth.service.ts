@@ -9,8 +9,6 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     @InjectRepository(Reader)
     private readonly readerRepository: Repository<Reader>,
     @InjectRepository(Author)
@@ -20,7 +18,11 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.userRepository.findOne({ where: { username } });
+    const user = 
+      await this.readerRepository.findOne({ where: { username } }) ||
+      await this.authorRepository.findOne({ where: { username } }) ||
+      await this.adminRepository.findOne({ where: { username } });
+
     if (user && bcrypt.compareSync(pass, user.password)) {
       const { password, ...result } = user;
       return result;

@@ -3,13 +3,16 @@ import { UsersService } from './users.service';
 import { UpdateReaderDto, UpdateAuthorDto, UpdateAdminDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Reader, Author, Admin } from './entities/user.entity';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { Roles } from '../auth/decorator/roles.decorator';
 
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // Methods for Readers
   @Get('readers')
+  @Roles('admin')
   public async findAllReaders(): Promise<Reader[]> {
     return this.usersService.findAllReaders();
   }
@@ -29,7 +32,7 @@ export class UsersController {
     await this.usersService.removeReader(+id);
   }
 
-  // Methods for Authors
+
   @Get('authors')
   public async findAllAuthors(): Promise<Author[]> {
     return this.usersService.findAllAuthors();
@@ -50,7 +53,7 @@ export class UsersController {
     await this.usersService.removeAuthor(+id);
   }
 
-  // Methods for Admins
+
   @Get('admins')
   public async findAllAdmins(): Promise<Admin[]> {
     return this.usersService.findAllAdmins();
