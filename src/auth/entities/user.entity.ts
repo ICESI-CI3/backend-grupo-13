@@ -1,9 +1,20 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
+@Entity()
+export class Role {
+  @PrimaryGeneratedColumn('uuid')
+  id: number;
+
+  @Column({ unique: true })
+  name: string; 
+
+  @Column()
+  description: string; 
+}
 
 @Entity()
 export abstract class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column({ unique: true })
@@ -15,27 +26,16 @@ export abstract class User {
   @Column()
   email: string;
 
-  @ManyToOne(type => Role)
+  @ManyToOne(() => Role)
   @JoinColumn({ name: "roleId" }) 
   role: Role;
 }
 
-@Entity()
-export class Role {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ unique: true })
-  name: string; 
-
-  @Column()
-  description: string; 
-}
 
 
 @Entity()
 export class Reader {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column()
@@ -49,7 +49,7 @@ export class Reader {
 
 @Entity()
 export class Author {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column()
@@ -67,7 +67,7 @@ export class Author {
 
 @Entity()
 export class Admin {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column()
