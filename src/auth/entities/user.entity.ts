@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, TableInheritance, ChildEntity } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+
 
 @Entity()
-@TableInheritance({ column: { type: 'varchar', name: 'role' } })
 export abstract class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,17 +15,31 @@ export abstract class User {
   @Column()
   email: string;
 
-  get role(): string {
-    return this.constructor.name;
-  }
+  @ManyToOne(type => Role)
+  @JoinColumn({ name: "roleId" }) 
+  role: Role;
 }
 
-@ChildEntity('Reader')
-export class Reader extends User {
-  get role(): string {
-    return 'Reader';
-  }
+@Entity()
+export class Role {
+  @PrimaryGeneratedColumn()
+  id: number;
 
+  @Column({ unique: true })
+  name: string; 
+
+  @Column()
+  description: string; 
+}
+
+
+@Entity()
+export class Reader {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  userId: number; 
   @Column()
   favoriteGenre: string;
 
@@ -33,11 +47,13 @@ export class Reader extends User {
   bookList: string;
 }
 
-@ChildEntity('Author')
-export class Author extends User {
-  get role(): string {
-    return 'Author';
-  }
+@Entity()
+export class Author {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  userId: number; 
 
   @Column()
   penName: string;
@@ -49,12 +65,15 @@ export class Author extends User {
   booksWritten: string;
 }
 
-@ChildEntity('Admin')
-export class Admin extends User {
-  get role(): string {
-    return 'Admin';
-  }
+@Entity()
+export class Admin {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  userId: number; 
 
   @Column()
   accessLevel: number;
 }
+

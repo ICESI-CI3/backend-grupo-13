@@ -1,12 +1,14 @@
-import { IsString, IsEmail, IsNotEmpty, IsArray, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsArray, IsOptional, IsNumber, IsInt, MinLength } from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
+  @MinLength(4)
   username: string;
 
   @IsNotEmpty()
   @IsString()
+  @MinLength(8)
   password: string;
 
   @IsNotEmpty()
@@ -14,17 +16,8 @@ export class CreateUserDto {
   email: string;
 
   @IsNotEmpty()
-  @IsArray()
-  @IsString({ each: true })
-  roles: string[];
-
-  @IsNotEmpty()
-  @IsString()
-  firstName: string;
-
-  @IsNotEmpty()
-  @IsString()
-  lastName: string;
+  @IsInt()
+  roleId: number;   
 
   @IsOptional()
   @IsString()
@@ -47,6 +40,6 @@ export class CreateUserDto {
   booksWritten?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   accessLevel?: number;
 }
