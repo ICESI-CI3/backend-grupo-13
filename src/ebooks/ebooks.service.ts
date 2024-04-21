@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, DeleteResult, Repository } from 'typeorm';
+import { DeepPartial, DeleteResult, In, Repository } from 'typeorm';
 import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
@@ -77,7 +77,7 @@ export class EbooksService {
   }
 
   public async assignEbookToReader(readerId: string, ebookId: string) {
-    
+
     const newEbook = this.ebookReaderRepository.create({
       readerId,
       ebookId
@@ -85,6 +85,21 @@ export class EbooksService {
 
     await this.ebookReaderRepository.save(newEbook);
     return newEbook;
+  }
+
+  async findAllEbooksByReader(readerId: string): Promise<Ebook[]> {
+    
+    const ebooksReader = await this.ebookReaderRepository.find({
+      where: { readerId: readerId }
+    });
+
+    const ebookIds = ebooksReader.map(er => er.ebookId);
+
+    if (ebookIds.length > 0) {
+      return this.ebooksRepository.findBy({ id: In(ebookIds) });
+    }
+
+    return [];
   }
 
 }

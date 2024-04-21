@@ -68,9 +68,14 @@ export class EbooksController {
     return this.ebooksService.remove(id);
   }
 
-  
+
   public async assignEbookToReader( userId:string, ebookId: string ){
     return this.ebooksService.assignEbookToReader(userId, ebookId);
+  }
+
+  @Get('/:readerId')
+  getBooksByReader(@Param('readerId') readerId: string): Promise<Ebook[]> {
+    return this.ebooksService.findAllEbooksByReader(readerId);
   }
 
 }
