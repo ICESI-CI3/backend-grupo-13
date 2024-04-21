@@ -1,4 +1,4 @@
-import { Author, User } from 'src/auth/entities/user.entity';
+import { Author } from 'src/auth/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity()
@@ -12,9 +12,9 @@ export class Ebook {
   @Column()
   publisher: string;
 
-  @OneToOne(() => User)
+  @OneToOne(() => Author)
   @JoinColumn()
-  author: User;
+  author: Author;
 
   @Column()
   overview: string;
