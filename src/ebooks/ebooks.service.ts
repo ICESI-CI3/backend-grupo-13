@@ -5,6 +5,7 @@ import { Ebook } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { AuthService } from 'src/auth/auth.service';
+import { VisualizeEbookDto } from './dto/visualize-ebook.dto';
 
 @Injectable()
 export class EbooksService {
@@ -30,7 +31,7 @@ export class EbooksService {
 
     await this.ebooksRepository.save(newEbook);
     return newEbook;
-}
+  }
 
 
   public async findAll(): Promise<Ebook[]> {
@@ -43,6 +44,15 @@ export class EbooksService {
       throw new NotFoundException(`Ebook with ID ${id} not found.`);
     }
     return ebook;
+  }
+
+  // TODO specify type for a filter
+  public async filterBy(filter): Promise<Ebook[]> {
+    const ebooks = await this.ebooksRepository.find({ where: filter });
+    if (ebooks.length == 0) {
+      throw new NotFoundException(`No ebook matches that filter`);
+    }
+    return ebooks;
   }
 
   public async findByTitle(title: string): Promise<Ebook> {

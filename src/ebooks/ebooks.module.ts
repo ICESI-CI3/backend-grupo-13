@@ -6,10 +6,10 @@ import { Ebook } from './entities/ebook.entity';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ebook]), 
-            AuthModule],
+  imports: [TypeOrmModule.forFeature([Ebook]),
+    AuthModule],
   controllers: [EbooksController],
   providers: [EbooksService],
   exports: [EbooksService],
 })
-export class EbooksModule {}
+export class EbooksModule { }
