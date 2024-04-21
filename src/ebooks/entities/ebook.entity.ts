@@ -31,3 +31,16 @@ export class Ebook {
   })
   fileData: Uint8Array;
 }
+
+@Entity()
+export class EbooksReader{
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  readerId:string;
+
+  @Column()
+  ebookId:string;
+}

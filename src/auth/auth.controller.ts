@@ -9,6 +9,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesGuard } from './guard/roles.guard';
 import { RoleEnum } from './enum/role.enum';
 import { Roles } from './decorator/roles.decorator';
+import { Request } from 'express';
 
 @UseGuards(RolesGuard)
 @Controller('auth')
@@ -47,7 +48,7 @@ export class AuthController {
 
   @Roles(RoleEnum.ADMIN)
   @UseGuards(AuthGuard('jwt'))
-  @Patch(':id')
+  @Patch('/:id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.authService.getUserById(id);
     if (!user) {
@@ -58,13 +59,19 @@ export class AuthController {
 
   @Roles(RoleEnum.ADMIN)
   @UseGuards(AuthGuard('jwt'))
-  @Delete(':id')
+  @Delete('/:id')
   public async remove(@Param('id') id: string): Promise<DeleteResult> {
     const user = await this.authService.getUserById(id);
     if (!user) {
       throw new NotFoundException({ message: "User not found" });
     }
     return this.authService.remove(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/session')
+  getProfile(@Req() req: Request) {
+      return req.user;
   }
   
 }

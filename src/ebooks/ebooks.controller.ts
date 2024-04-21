@@ -67,4 +67,10 @@ export class EbooksController {
     }
     return this.ebooksService.remove(id);
   }
+
+  
+  public async assignEbookToReader( userId:string, ebookId: string ){
+    return this.ebooksService.assignEbookToReader(userId, ebookId);
+  }
+
 }

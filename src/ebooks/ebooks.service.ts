@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, DeleteResult, Repository } from 'typeorm';
-import { Ebook } from './entities/ebook.entity';
+import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { AuthService } from 'src/auth/auth.service';
@@ -12,6 +12,7 @@ export class EbooksService {
   constructor(
     @InjectRepository(Ebook)
     private readonly ebooksRepository: Repository<Ebook>,
+    private readonly ebookReaderRepository: Repository<EbooksReader>,
     private readonly authService: AuthService
   ) { }
 
@@ -74,4 +75,16 @@ export class EbooksService {
     }
     return result;
   }
+
+  public async assignEbookToReader(readerId: string, ebookId: string) {
+    
+    const newEbook = this.ebookReaderRepository.create({
+      readerId,
+      ebookId
+    });
+
+    await this.ebookReaderRepository.save(newEbook);
+    return newEbook;
+  }
+
 }
