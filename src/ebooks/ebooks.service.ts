@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { Between, DeleteResult, MoreThan, Repository } from 'typeorm';
 import { Ebook } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
@@ -55,7 +55,7 @@ export class EbooksService {
       throw new NotFoundException(`Ebook not found.`);
     }
 
-    const result = await this.wishRepository.delete({reader, ebook});
+    const result = await this.wishRepository.delete({ reader, ebook });
     if (result.affected === 0) {
       throw new NotFoundException(`No changes`);
     }
@@ -93,9 +93,21 @@ export class EbooksService {
     return ebook;
   }
 
-  // TODO specify type for a filter
-  public async filterBy(filter): Promise<Ebook[]> {
-    const ebooks = await this.ebooksRepository.find({ where: filter });
+  public async filterBy(filter: { price: number[], author: string, }): Promise<Ebook[]> {
+    const query = {};
+
+    if (filter.price) {
+      query['price'] = Between(filter.price[0], filter.price[1]);
+    }
+
+    if (filter.author) {
+      query['author'] = filter.author;
+    }
+
+    const ebooks = await this.ebooksRepository.findBy(
+      query
+    );
+    
     if (ebooks.length == 0) {
       throw new NotFoundException(`No ebook matches that filter`);
     }
