@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, DeleteResult, MoreThan, Repository } from 'typeorm';
-import { Ebook } from './entities/ebook.entity';
+import { Between, DeleteResult, Repository } from 'typeorm';
+import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
-import { Author, Reader } from 'src/auth/entities/user.entity';
 import { Wish } from './entities/wish.entity';
 import { WishListDto } from './dto/wishlist';
 import { AuthService } from 'src/auth/auth.service';
@@ -12,11 +11,12 @@ import { AuthService } from 'src/auth/auth.service';
 @Injectable()
 export class EbooksService {
   constructor(
-    private authService: AuthService,
     @InjectRepository(Ebook)
     private readonly ebooksRepository: Repository<Ebook>,
     @InjectRepository(Wish)
     private readonly wishRepository: Repository<Wish>,
+    private readonly ebookReaderRepository: Repository<EbooksReader>,
+    private readonly authService: AuthService
   ) { }
 
   public async addToWishlist(dto: WishListDto): Promise<Wish> {
@@ -71,7 +71,6 @@ export class EbooksService {
     }
 
     const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
-
     const newEbook = this.ebooksRepository.create({
       ...createEbookDto,
       author: author,
@@ -87,7 +86,7 @@ export class EbooksService {
     return this.ebooksRepository.find();
   }
 
-  public async findById(id: number): Promise<Ebook> {
+  public async findById(id: string): Promise<Ebook> {
     const ebook = await this.ebooksRepository.findOne({ where: { id } });
     if (!ebook) {
       throw new NotFoundException(`Ebook with ID ${id} not found.`);
@@ -125,18 +124,45 @@ export class EbooksService {
     }
   }
 
-  public async update(id: number, updateEbookDto: UpdateEbookDto): Promise<Ebook> {
+  public async update(id: string, updateEbookDto: UpdateEbookDto): Promise<Ebook> {
     const ebook = await this.findById(id);
     const updatedEbook = Object.assign(ebook, updateEbookDto);
     await this.ebooksRepository.save(updatedEbook);
     return updatedEbook;
   }
 
-  public async remove(id: number): Promise<DeleteResult> {
+  public async remove(id: string): Promise<DeleteResult> {
     const result = await this.ebooksRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Ebook with ID ${id} not found.`);
     }
     return result;
   }
+
+  public async assignEbookToReader(readerId: string, ebookId: string) {
+
+    const newEbook = this.ebookReaderRepository.create({
+      readerId,
+      ebookId
+    });
+
+    await this.ebookReaderRepository.save(newEbook);
+    return newEbook;
+  }
+
+  async findAllEbooksByReader(readerId: string): Promise<Ebook[]> {
+    
+    const ebooksReader = await this.ebookReaderRepository.find({
+      where: { readerId: readerId }
+    });
+
+    const ebookIds = ebooksReader.map(er => er.ebookId);
+
+    if (ebookIds.length > 0) {
+      return this.ebooksRepository.findBy({ id: In(ebookIds) });
+    }
+
+    return [];
+  }
+
 }

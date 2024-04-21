@@ -1,4 +1,4 @@
 export class WishListDto {
   reader: string;
-  ebook: number;
+  ebook: string;
 }

@@ -22,7 +22,7 @@ export abstract class User {
 @Entity()
 export class Reader {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column()
   userId: string; 
@@ -37,7 +37,7 @@ export class Reader {
 @Entity()
 export class Author {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column()
   userId: string; 

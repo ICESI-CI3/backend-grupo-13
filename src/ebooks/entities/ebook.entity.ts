@@ -3,8 +3,9 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'ty
 
 @Entity()
 export class Ebook {
-  @PrimaryGeneratedColumn()
-  id: number;
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   title: string;
@@ -29,4 +30,17 @@ export class Ebook {
     type: 'bytea',
   })
   fileData: Uint8Array;
+}
+
+@Entity()
+export class EbooksReader{
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  readerId:string;
+
+  @Column()
+  ebookId:string;
 }
