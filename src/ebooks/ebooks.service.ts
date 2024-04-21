@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeepPartial, DeleteResult, Repository } from 'typeorm';
 import { Ebook } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { AuthService } from 'src/auth/auth.service';
+import { Author } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class EbooksService {
@@ -15,16 +16,21 @@ export class EbooksService {
   ) { }
 
   public async create(createEbookDto: CreateEbookDto): Promise<Ebook> {
-    const author = await this.authService.getUserByIdAndRole(createEbookDto.author, 'Author');
+    const author = await this.authService.getUserByIdAndRole(createEbookDto.author.userId, 'Author');
 
     if (!author) {
       throw new NotFoundException(`Author with ID ${createEbookDto.author} not found.`);
     }
 
     const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
+    const ebookAuthor: DeepPartial<Author> = {
+      id: +author.id, 
+      
+    };
+    
     const newEbook = this.ebooksRepository.create({
       ...createEbookDto,
-      author: author, // Asegúrate de que esto coincida con la estructura esperada de la entidad Ebook
+      author: ebookAuthor,
       fileData: binaryData,
     });
 

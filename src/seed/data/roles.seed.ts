@@ -1,3 +1,4 @@
+/*
 import  {v4 as uuid} from 'uuid';
 import { Role } from 'src/auth/entities/user.entity';
 
@@ -19,3 +20,4 @@ export const rolesSeed: Role[] = [
     }
       
 ];
+*/
