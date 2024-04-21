@@ -18,6 +18,7 @@ export class AuthController {
   async login(@Body() loginUserDto: LoginUserDto): Promise<{ access_token: string }> {
     return this.authService.login(loginUserDto);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('/status')
   async checkAuthStatus(@Req() req): Promise<{ access_token: string }> {

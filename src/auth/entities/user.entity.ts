@@ -1,18 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { RoleEnum } from "../enum/role.enum";
 import { UUID } from "crypto";
-
-@Entity()
-export class Role {
-  @PrimaryGeneratedColumn('uuid')
-  id: number;
-
-  @Column({ unique: true })
-  name: string; 
-
-  @Column()
-  description: string; 
-}
 
 @Entity()
 export abstract class User {
@@ -31,8 +19,6 @@ export abstract class User {
   @Column({ type: 'enum', default: RoleEnum.USER, enum: RoleEnum })
   role: RoleEnum;
 }
-
-
 
 @Entity()
 export class Reader {
