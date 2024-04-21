@@ -4,19 +4,66 @@ import { DeleteResult, Repository } from 'typeorm';
 import { Ebook } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
-import { AuthService } from 'src/auth/auth.service';
-import { VisualizeEbookDto } from './dto/visualize-ebook.dto';
+import { Author, Reader } from 'src/auth/entities/user.entity';
+import { Wish } from './entities/wish.entity';
+import { WishListDto } from './dto/wishlist';
 
 @Injectable()
 export class EbooksService {
   constructor(
     @InjectRepository(Ebook)
     private readonly ebooksRepository: Repository<Ebook>,
-    private readonly authService: AuthService
+    @InjectRepository(Author)
+    private readonly authorRepository: Repository<Author>,
+    @InjectRepository(Reader)
+    private readonly readerRepository: Repository<Reader>,
+    @InjectRepository(Wish)
+    private readonly wishRepository: Repository<Wish>,
   ) { }
 
+  public async addToWishlist(dto: WishListDto): Promise<Wish> {
+    const reader = await this.readerRepository.findOne({ where: { id: dto.reader } });
+
+    if (!reader) {
+      throw new NotFoundException(`Reader not found.`);
+    }
+
+    const ebook = await this.ebooksRepository.findOne({ where: { id: dto.ebook } });
+
+    if (!ebook) {
+      throw new NotFoundException(`Ebook not found.`);
+    }
+
+    const newWish = this.wishRepository.create({
+      reader,
+      ebook
+    });
+    await this.wishRepository.save(newWish);
+    return newWish;
+  }
+
+  public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
+    const reader = await this.readerRepository.findOne({ where: { id: dto.reader } });
+
+    if (!reader) {
+      throw new NotFoundException(`Reader not found.`);
+    }
+
+    const ebook = await this.ebooksRepository.findOne({ where: { id: dto.ebook } });
+
+    if (!ebook) {
+      throw new NotFoundException(`Ebook not found.`);
+    }
+
+    const result = await this.wishRepository.delete({reader, ebook});
+    if (result.affected === 0) {
+      throw new NotFoundException(`No changes`);
+    }
+    return result;
+  }
+
   public async create(createEbookDto: CreateEbookDto): Promise<Ebook> {
-    const author = await this.authService.getUserByIdAndRole(createEbookDto.author, 'Author');
+    const author = await this.authorRepository.findOne({ where: { id: createEbookDto.author } });
 
     if (!author) {
       throw new NotFoundException(`Author with ID ${createEbookDto.author} not found.`);
@@ -25,7 +72,7 @@ export class EbooksService {
     const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
     const newEbook = this.ebooksRepository.create({
       ...createEbookDto,
-      author: author, // Asegúrate de que esto coincida con la estructura esperada de la entidad Ebook
+      author: author,
       fileData: binaryData,
     });
 

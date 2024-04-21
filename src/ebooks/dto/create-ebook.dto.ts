@@ -1,7 +1,7 @@
 export class CreateEbookDto {
   title: string;
   publisher: string;
-  author: string;
+  author: number;
   overview: string;
   price: number;
   stock: number;
