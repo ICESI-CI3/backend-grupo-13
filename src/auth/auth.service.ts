@@ -1,14 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Author, Reader, Role, User } from './entities/user.entity';
+import { Author, Reader, User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 
 @Injectable()
@@ -128,5 +129,41 @@ export class AuthService {
       break;
     }
     return this.userRepository.findOne({ where: { id, role: rol } });
+  }
+
+  public async findAll(): Promise<User[]> {
+    return this.userRepository.find();
+  }
+
+  public async findById(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
+    }
+    return user;
+  }  
+
+  public async findByUsername(username: string): Promise<User>{
+    try{
+      const user = await this.userRepository.findOne({where: {username}});
+      return user;
+    }catch(error){
+      throw error;
+    }
+  }
+
+  public async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findById(id); 
+    const updatedUser = Object.assign(user, updateUserDto);
+    await this.userRepository.save(updatedUser);
+    return updatedUser;
+  }
+
+  public async remove(id: string): Promise<DeleteResult> {
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
+    }
+    return result;
   }
 }

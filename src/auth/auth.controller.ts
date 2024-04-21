@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Get, UseGuards, Req, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, Param, HttpException, Delete, HttpStatus, NotFoundException, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from './entities/user.entity';
+import { DeleteResult } from 'typeorm';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -35,6 +37,47 @@ export class AuthController {
   @Get('/')
   async getAllUsers(): Promise<User[]> {
       return this.authService.getAllUsers();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get()
+  public async findAll(): Promise<User[]> {
+    try {
+      const users = this.authService.findAll();
+      return users;        
+    } catch(error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':id')
+  public async findById(@Param('id') id: string): Promise<User> {
+    const user = await this.authService.findById(id);
+    if (!user) {
+      throw new NotFoundException({ message: "User not found" });
+    }
+    return user;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(':id')
+  public async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.authService.findById(id);
+    if (!user) {
+      throw new NotFoundException({ message: "User not found" });
+    }
+    return this.authService.update(id, updateUserDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':id')
+  public async remove(@Param('id') id: string): Promise<DeleteResult> {
+    const user = await this.authService.findById(id);
+    if (!user) {
+      throw new NotFoundException({ message: "User not found" });
+    }
+    return this.authService.remove(id);
   }
   
 }

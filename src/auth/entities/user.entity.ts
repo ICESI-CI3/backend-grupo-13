@@ -1,6 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { RoleEnum } from "../enum/role.enum";
-import { UUID } from "crypto";
 
 @Entity()
 export abstract class User {
