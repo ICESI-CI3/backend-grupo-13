@@ -3,10 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Author, Reader, Role, User, Admin } from './entities/user.entity';
+import { Author, Reader, Role, User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { BadRequestException } from '@nestjs/common';
+import { RoleEnum } from './enum/role.enum';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 
 @Injectable()
@@ -20,21 +22,8 @@ export class AuthService {
     private readonly readerRepository: Repository<Reader>,
     @InjectRepository(Author)
     private readonly authorRepository: Repository<Author>,
-    @InjectRepository(Admin)
-    private readonly adminRepository: Repository<Admin>,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
   ) { }
 
-  async validateUser(username: string, pass: string, roles: string[]): Promise<any> {
-    const user = await this.userRepository.findOne({ where: { username } });
-
-    if (user && bcrypt.compareSync(pass, user.password) && roles.includes(user.role.name)) {
-      const { password, ...result } = user;
-      return result;
-    }
-    return null;
-  }
 
   async login(loginUserDto: LoginUserDto): Promise<{ access_token: string }> {
     const { email, password } = loginUserDto;
@@ -53,35 +42,41 @@ export class AuthService {
   async createUser(createUserDto: CreateUserDto): Promise<{ access_token: string }> {
     try {
 
-    const { password, roleId, ...userData } = createUserDto;
+      const { password, role, ...userData } = createUserDto;
 
-    const role = await this.roleRepository.findOneBy({ id: roleId });
-    if (!role) {
-      throw new Error('The role provided is not valid.');
+
+      const hashedPassword = bcrypt.hashSync(password, 10);
+
+      let rol;
+      switch (role) {
+        case 'Reader':
+          rol = RoleEnum.USER
+          break;
+        case 'Author':
+          rol = RoleEnum.AUTHOR
+          break;
+      }
+
+      const user = await this.userRepository.create({
+        ...userData,
+        password: hashedPassword,
+        role: rol
+      });
+      const savedUser = await this.userRepository.save(user);
+
+      console.log("Role: ", role, " ID Usuario: ", savedUser.id)
+      await this.addRoleSpecific(role, savedUser.id, createUserDto);
+
+      const payload = { username: savedUser.username, sub: savedUser.id, role: savedUser.role };
+      return {
+        access_token: this.jwtService.sign(payload),
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-
-    const hashedPassword = bcrypt.hashSync(password, 10);
-
-    const user = await this.userRepository.create({
-      ...userData,
-      password: hashedPassword,
-      role: role
-    });
-    const savedUser = await this.userRepository.save(user);
-
-    await this.addRoleSpecific(role.name, savedUser.id, createUserDto);
-
-    const payload = { username: savedUser.username, sub: savedUser.id, role: savedUser.role.name };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  } catch (error) {
-    // Atrapar y lanzar como una excepción de NestJS
-    throw new BadRequestException(error.message);
-  }
   }
 
-  private async addRoleSpecific(roleName: string, userId: number, createUserDto: CreateUserDto) {
+  private async addRoleSpecific(roleName: string, userId: string, createUserDto: CreateUserDto) {
     switch (roleName) {
       case 'Reader':
         console.log("Creando lector");
@@ -102,14 +97,6 @@ export class AuthService {
         });
         await this.authorRepository.save(author);
         break;
-      case 'Admin':
-        console.log("Creando admin");
-        const admin = this.adminRepository.create({
-          userId: userId,
-          accessLevel: createUserDto.accessLevel,
-        });
-        await this.adminRepository.save(admin);
-        break;
     }
   }
 
@@ -119,7 +106,7 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
-  async getUserById(id: number): Promise<User | undefined> {
+  async getUserById(id: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: { id } });
   }
 
@@ -127,13 +114,19 @@ export class AuthService {
     return this.userRepository.find();
   }
 
-  async getUserByIdAndRole(id: number, roleName: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { id, role: {name: roleName} } });
-  }
-  async fillRolesWithSeedData(rolesSeed: Role[]) {
-    for (const role of rolesSeed) {
-        const roleEntity = this.roleRepository.create(role);
-        await this.roleRepository.save(roleEntity);
+  async getUserByIdAndRole(id: string, roleName: string): Promise<User | undefined> {
+    let rol;
+    switch (roleName) {
+      case 'Reader':
+        rol = RoleEnum.USER
+        break;
+      case 'Author':
+        rol = RoleEnum.AUTHOR
+        break;
+      case 'Admin':
+        rol = RoleEnum.ADMIN
+      break;
     }
-  } 
+    return this.userRepository.findOne({ where: { id, role: rol } });
+  }
 }

@@ -1,4 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { RoleEnum } from "../enum/role.enum";
+import { UUID } from "crypto";
 
 @Entity()
 export class Role {
@@ -15,7 +17,7 @@ export class Role {
 @Entity()
 export abstract class User {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column({ unique: true })
   username: string;
@@ -26,9 +28,8 @@ export abstract class User {
   @Column()
   email: string;
 
-  @ManyToOne(() => Role)
-  @JoinColumn({ name: "roleId" }) 
-  role: Role;
+  @Column({ type: 'enum', default: RoleEnum.USER, enum: RoleEnum })
+  role: RoleEnum;
 }
 
 
@@ -39,7 +40,8 @@ export class Reader {
   id: number;
 
   @Column()
-  userId: number; 
+  userId: string; 
+
   @Column()
   favoriteGenre: string;
 
@@ -53,7 +55,7 @@ export class Author {
   id: number;
 
   @Column()
-  userId: number; 
+  userId: string; 
 
   @Column()
   penName: string;
@@ -64,16 +66,3 @@ export class Author {
   @Column({ type: 'text' })
   booksWritten: string;
 }
-
-@Entity()
-export class Admin {
-  @PrimaryGeneratedColumn('uuid')
-  id: number;
-
-  @Column()
-  userId: number; 
-
-  @Column()
-  accessLevel: number;
-}
-

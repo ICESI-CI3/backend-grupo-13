@@ -7,7 +7,7 @@ import { rolesSeed } from './data/roles.seed'
 export class SeedService {
   constructor(private readonly authService: AuthService) {}
   populateDB() {
-    this.authService.fillRolesWithSeedData(rolesSeed);
-    return 'DB populated';
+    /*this.authService.fillRolesWithSeedData(rolesSeed);
+    return 'DB populated';*/
   }
 }
