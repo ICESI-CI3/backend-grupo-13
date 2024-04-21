@@ -111,6 +111,14 @@ export class AuthService {
     return this.userRepository.findOne({ where: { id } });
   }
 
+  async getReaderByUser(userId: string) {
+    return this.readerRepository.findOne({ where: { userId } });
+  } 
+
+  async getAuthorByUser(userId: string) {
+    return this.authorRepository.findOne({ where: { userId } });
+  } 
+
   async getAllUsers(): Promise<User[]> {
     return this.userRepository.find();
   }

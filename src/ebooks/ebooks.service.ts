@@ -7,22 +7,21 @@ import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { Author, Reader } from 'src/auth/entities/user.entity';
 import { Wish } from './entities/wish.entity';
 import { WishListDto } from './dto/wishlist';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class EbooksService {
   constructor(
+    private authService: AuthService,
     @InjectRepository(Ebook)
     private readonly ebooksRepository: Repository<Ebook>,
-    @InjectRepository(Author)
-    private readonly authorRepository: Repository<Author>,
-    @InjectRepository(Reader)
-    private readonly readerRepository: Repository<Reader>,
     @InjectRepository(Wish)
     private readonly wishRepository: Repository<Wish>,
   ) { }
 
   public async addToWishlist(dto: WishListDto): Promise<Wish> {
-    const reader = await this.readerRepository.findOne({ where: { id: dto.reader } });
+    const user = await this.authService.getUserById(dto.reader);
+    const reader = await this.authService.getReaderByUser(user.id);
 
     if (!reader) {
       throw new NotFoundException(`Reader not found.`);
@@ -43,7 +42,8 @@ export class EbooksService {
   }
 
   public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
-    const reader = await this.readerRepository.findOne({ where: { id: dto.reader } });
+    const user = await this.authService.getUserById(dto.reader);
+    const reader = await this.authService.getReaderByUser(user.id);
 
     if (!reader) {
       throw new NotFoundException(`Reader not found.`);
@@ -63,13 +63,15 @@ export class EbooksService {
   }
 
   public async create(createEbookDto: CreateEbookDto): Promise<Ebook> {
-    const author = await this.authorRepository.findOne({ where: { id: createEbookDto.author } });
+    const user = await this.authService.getUserById(createEbookDto.author);
+    const author = await this.authService.getAuthorByUser(user.id);
 
     if (!author) {
       throw new NotFoundException(`Author with ID ${createEbookDto.author} not found.`);
     }
 
     const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
+
     const newEbook = this.ebooksRepository.create({
       ...createEbookDto,
       author: author,
@@ -107,7 +109,7 @@ export class EbooksService {
     const ebooks = await this.ebooksRepository.findBy(
       query
     );
-    
+
     if (ebooks.length == 0) {
       throw new NotFoundException(`No ebook matches that filter`);
     }

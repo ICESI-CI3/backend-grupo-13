@@ -1,5 +1,6 @@
-// import  {v4 as uuid} from 'uuid';
-// import { Role } from 'src/auth/entities/user.entity';
+/*
+import  {v4 as uuid} from 'uuid';
+import { Role } from 'src/auth/entities/user.entity';
 
 // export const rolesSeed: Role[] = [
 //     {
@@ -18,4 +19,5 @@
 //         description: 'Has full access to all features, settings, and administrative functions'
 //     }
       
-// ];
+];
+*/

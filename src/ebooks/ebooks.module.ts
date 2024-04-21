@@ -4,12 +4,12 @@ import { EbooksService } from './ebooks.service';
 import { EbooksController } from './ebooks.controller';
 import { Ebook } from './entities/ebook.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { Wish } from './entities/wish.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ebook]),
-    AuthModule],
+  imports: [TypeOrmModule.forFeature([Ebook]), TypeOrmModule.forFeature([Wish]), AuthModule],
   controllers: [EbooksController],
   providers: [EbooksService],
-  exports: [EbooksService],
+  exports: [EbooksService]
 })
 export class EbooksModule { }
