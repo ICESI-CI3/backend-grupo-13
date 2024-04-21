@@ -131,18 +131,6 @@ export class AuthService {
     return this.userRepository.findOne({ where: { id, role: rol } });
   }
 
-  public async findAll(): Promise<User[]> {
-    return this.userRepository.find();
-  }
-
-  public async findById(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
-    }
-    return user;
-  }  
-
   public async findByUsername(username: string): Promise<User>{
     try{
       const user = await this.userRepository.findOne({where: {username}});
@@ -153,7 +141,7 @@ export class AuthService {
   }
 
   public async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findById(id); 
+    const user = await this.getUserById(id); 
     const updatedUser = Object.assign(user, updateUserDto);
     await this.userRepository.save(updatedUser);
     return updatedUser;
