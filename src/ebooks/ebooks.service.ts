@@ -24,7 +24,7 @@ export class EbooksService {
 
     const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
     const ebookAuthor: DeepPartial<Author> = {
-      id: +author.id, 
+      id: author.id, 
       
     };
     
@@ -43,7 +43,7 @@ export class EbooksService {
     return this.ebooksRepository.find();
   }
 
-  public async findById(id: number): Promise<Ebook> {
+  public async findById(id: string): Promise<Ebook> {
     const ebook = await this.ebooksRepository.findOne({ where: { id } });
     if (!ebook) {
       throw new NotFoundException(`Ebook with ID ${id} not found.`);
@@ -60,14 +60,14 @@ export class EbooksService {
     }
   }
 
-  public async update(id: number, updateEbookDto: UpdateEbookDto): Promise<Ebook> {
+  public async update(id: string, updateEbookDto: UpdateEbookDto): Promise<Ebook> {
     const ebook = await this.findById(id);
     const updatedEbook = Object.assign(ebook, updateEbookDto);
     await this.ebooksRepository.save(updatedEbook);
     return updatedEbook;
   }
 
-  public async remove(id: number): Promise<DeleteResult> {
+  public async remove(id: string): Promise<DeleteResult> {
     const result = await this.ebooksRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Ebook with ID ${id} not found.`);

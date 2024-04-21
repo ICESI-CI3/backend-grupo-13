@@ -41,7 +41,7 @@ export class EbooksController {
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Get(':id')
   public async findById(@Param('id') id: string): Promise<Ebook> {
-    const ebook = await this.ebooksService.findById(+id);
+    const ebook = await this.ebooksService.findById(id);
     if (!ebook) {
       throw new NotFoundException({ message: "Ebook not found" });
     }
@@ -51,20 +51,20 @@ export class EbooksController {
   @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
   @Patch(':id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateEbookDto): Promise<Ebook> {
-    const ebook = await this.ebooksService.findById(+id);
+    const ebook = await this.ebooksService.findById(id);
     if (!ebook) {
       throw new NotFoundException({ message: "Ebook not found" });
     }
-    return this.ebooksService.update(+id, updateUserDto);
+    return this.ebooksService.update(id, updateUserDto);
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
   @Delete(':id')
   public async remove(@Param('id') id: string): Promise<DeleteResult> {
-    const ebook = await this.ebooksService.findById(+id);
+    const ebook = await this.ebooksService.findById(id);
     if (!ebook) {
       throw new NotFoundException({ message: "Ebook not found" });
     }
-    return this.ebooksService.remove(+id);
+    return this.ebooksService.remove(id);
   }
 }
