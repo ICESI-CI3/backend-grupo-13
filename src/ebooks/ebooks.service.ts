@@ -15,6 +15,7 @@ export class EbooksService {
     private readonly ebooksRepository: Repository<Ebook>,
     @InjectRepository(Wish)
     private readonly wishRepository: Repository<Wish>,
+    @InjectRepository(EbooksReader)
     private readonly ebookReaderRepository: Repository<EbooksReader>,
     private readonly authService: AuthService
   ) { }
