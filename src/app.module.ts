@@ -8,6 +8,7 @@ import { join } from 'path';
 import { EbooksModule } from './ebooks/ebooks.module';
 import { SeedModule } from './seed/seed.module';
 import { PaymentModule } from './payment/payment.module';
+import { OrderModule } from './order/order.module';
 
 
 
@@ -31,7 +32,8 @@ import { PaymentModule } from './payment/payment.module';
     AuthModule,
     EbooksModule,
     SeedModule,
-    PaymentModule],
+    PaymentModule,
+    OrderModule],
   controllers: [AppController],
   providers: [AppService],
 })

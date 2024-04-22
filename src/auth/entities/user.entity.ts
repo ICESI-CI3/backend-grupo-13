@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { RoleEnum } from "../enum/role.enum";
+import { Order } from "src/order/entities/order.entity";
 
 @Entity()
 export abstract class User {
@@ -32,6 +33,8 @@ export class Reader {
 
   @Column({ type: 'text' })
   bookList: string;
+
+  orders: Order[];
 }
 
 @Entity()
@@ -50,4 +53,6 @@ export class Author {
 
   @Column({ type: 'text' })
   booksWritten: string;
+
+  orders: Order[];
 }

@@ -17,6 +17,8 @@ export class EbooksService {
     private readonly wishRepository: Repository<Wish>,
     @InjectRepository(EbooksReader)
     private readonly ebookReaderRepository: Repository<EbooksReader>,
+    @InjectRepository(EbooksReader)
+    private ebooksReaderRepository: Repository<EbooksReader>,
     private readonly authService: AuthService
   ) { }
 
@@ -165,5 +167,21 @@ export class EbooksService {
 
     return [];
   }
+
+  async addEbooksToReader(readerId: string, ebooks: Ebook[]): Promise<void> {
+    for (const ebook of ebooks) {
+      const existingEntry = await this.ebooksReaderRepository.findOne({
+        where: { readerId: readerId, ebookId: ebook.id },
+      });
+  
+      if (!existingEntry) {
+        const newEntry = new EbooksReader();
+        newEntry.readerId = readerId;
+        newEntry.ebookId = ebook.id;
+        await this.ebooksReaderRepository.save(newEntry);
+      }
+    }
+  }
+  
 
 }
