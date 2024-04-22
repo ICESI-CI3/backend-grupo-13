@@ -41,7 +41,7 @@ export class EbooksController {
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
-  @Get(':id')
+  @Get('info/:id')
   public async findById(@Param('id') id: string): Promise<InfoEbookDto> {
     const ebook = await this.ebooksService.findById(id);
     if (!ebook) {
@@ -51,7 +51,7 @@ export class EbooksController {
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
-  @Get(':id')
+  @Get('visualize/:id')
   public async visualizeById(@Param('id') id: string): Promise<VisualizeEbookDto> {
     const ebook = await this.ebooksService.findById(id);
     if (!ebook) {

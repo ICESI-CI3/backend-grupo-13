@@ -9,7 +9,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesGuard } from './guard/roles.guard';
 import { RoleEnum } from './enum/role.enum';
 import { Roles } from './decorator/roles.decorator';
-import { Request } from 'express';
 
 @UseGuards(RolesGuard)
 @Controller('auth')
@@ -70,7 +69,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/session')
-  getProfile(@Req() req: Request) {
+  getProfile(@Req() req):Promise<User> {
       return req.user;
   }
   
