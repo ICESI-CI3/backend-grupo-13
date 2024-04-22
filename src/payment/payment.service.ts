@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from './entities/transaction.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
 
 @Injectable()
 export class PaymentService {
@@ -38,6 +39,7 @@ export class PaymentService {
     this.responseUrl = this.configService.get<string>('PAYU_RESPONSE_URL');
     this.confirmationUrl = this.configService.get<string>('PAYU_CONFIRMATION_URL');
     this.test = +this.configService.get<string>('TEST_FLAG');
+    this.currency = this.configService.get<string>('CURRENCY');
 
   }
   generateFormSignature(apiKey:string,merchantId:string, referenceCode:string, amount:string,currency:string): string {
@@ -74,12 +76,12 @@ export class PaymentService {
     `;
   }
   
-  generatePaymentLink(amount: number, referenceCode: string, email: string, currency: string): string {
-    this.amount=amount;
-    this.referenceCode=referenceCode;
-    this.buyerEmail=email;
-    this.currency=currency;
-    this.amount=amount;
+  generatePaymentLink(createTransactionFormDto : CreateTransactionFormDto): string {
+    this.amount=createTransactionFormDto.amount;
+    this.referenceCode=createTransactionFormDto.referenceCode;
+    this.buyerEmail=createTransactionFormDto.buyerEmail;
+    this.currency=this.currency;
+    this.amount=createTransactionFormDto.amount;
     this.signature = this.generateFormSignature(this.apiKey,this.merchantId, this.referenceCode, this.amount.toString(),this.currency);
     this.tax = this.amount * 0.19;
     this.taxReturnBase = this.amount - this.tax;

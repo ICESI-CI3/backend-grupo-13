@@ -1,4 +1,4 @@
-import { Reader } from 'src/auth/entities/user.entity';
+import { User } from 'src/auth/entities/user.entity';
 import { Ebook } from 'src/ebooks/entities/ebook.entity';
 import { Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable, CreateDateColumn, ManyToOne, JoinColumn, Column } from 'typeorm';
 
@@ -7,9 +7,9 @@ export class Order {
   @PrimaryGeneratedColumn('uuid')
   referenceCode: string;
 
-  @ManyToOne(() => Reader, reader => reader.orders)
+  @ManyToOne(() => User, user => user.orders)
   @JoinColumn({ name: 'reader_id' })
-  reader: Reader;
+  user: User;
 
   @ManyToMany(() => Ebook)
   @JoinTable({

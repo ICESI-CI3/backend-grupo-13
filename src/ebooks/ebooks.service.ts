@@ -183,5 +183,9 @@ export class EbooksService {
     }
   }
   
-
+  async findBy(ids: string[]): Promise<Ebook[]> {
+    return await this.ebooksRepository.find({
+      where: { id: In(ids) }
+    });
+  }
 }

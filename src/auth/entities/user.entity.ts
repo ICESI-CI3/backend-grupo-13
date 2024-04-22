@@ -18,6 +18,8 @@ export abstract class User {
 
   @Column({ type: 'enum', default: RoleEnum.USER, enum: RoleEnum })
   role: RoleEnum;
+
+  orders: Order[];
 }
 
 @Entity()
@@ -34,7 +36,6 @@ export class Reader {
   @Column({ type: 'text' })
   bookList: string;
 
-  orders: Order[];
 }
 
 @Entity()
@@ -54,5 +55,4 @@ export class Author {
   @Column({ type: 'text' })
   booksWritten: string;
 
-  orders: Order[];
 }

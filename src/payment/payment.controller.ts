@@ -1,10 +1,9 @@
 import { Controller, Post, Body, Res, Get, Query, HttpException, HttpStatus, Param } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from '../order/dto/create-order.dto';
-import { Response } from 'express';
-import { CONFIGURABLE_MODULE_ID } from '@nestjs/common/module-utils/constants';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { Response } from 'express';
 import { OrderService } from '../order/order.service';
+import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
 
 @Controller('payments')
 export class PaymentController {
@@ -12,8 +11,8 @@ export class PaymentController {
     private readonly orderService: OrderService) {}
 
   @Post('payu-payment')
-  async createPayuPayment(@Body() createPaymentDto: CreatePaymentDto, @Res() res: Response) {
-    const paymentData = this.paymentService.generatePaymentLink(createPaymentDto.amount,createPaymentDto.referenceCode,createPaymentDto.email,createPaymentDto.currency);
+  async createPayuPayment(@Body() createTransactionFormDto: CreateTransactionFormDto, @Res() res: Response) {
+    const paymentData = this.paymentService.generatePaymentLink(createTransactionFormDto);
     res.send(paymentData);
   }
   @Get('payu-response')
