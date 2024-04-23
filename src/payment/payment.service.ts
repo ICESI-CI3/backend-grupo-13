@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
@@ -6,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from './entities/transaction.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
+import { OrderService } from 'src/order/order.service';
+import { Order } from 'src/order/entities/order.entity';
 
 @Injectable()
 export class PaymentService {
@@ -29,8 +31,9 @@ export class PaymentService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-
     private configService: ConfigService,
+    @Inject(forwardRef(() => OrderService))
+    private readonly orderService: OrderService,
   ) {
     this.apiKey = this.configService.get<string>('PAYU_API_KEY');
     this.merchantId = this.configService.get<string>('PAYU_MERCHANT_ID');
@@ -93,6 +96,12 @@ export class PaymentService {
     return this.transactionRepository.save(transaction);
   }
   
+  async findOrderByReferenceCode(referenceCode:string): Promise<Order> {
+    return await this.orderService.findOrderByReferenceCode(referenceCode);
+  }
+  async processOrderBooks(order:Order): Promise<void> {
+    return await this.orderService.processOrderBooks(order);
+  }
   
   
 }
