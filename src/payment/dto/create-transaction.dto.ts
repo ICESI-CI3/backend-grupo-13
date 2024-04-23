@@ -1,23 +1,28 @@
 import { IsString, IsNumber, IsDate, IsOptional } from 'class-validator';
+import { User } from 'src/auth/entities/user.entity';
 
 export class CreateTransactionDto {
-  @IsOptional()
+
+  
+  @IsString()
+  user?: User;
+
   @IsString()
   merchantId?: string;
 
-  @IsOptional()
+
   @IsString()
   merchantName?: string;
 
-  @IsOptional()
+
   @IsString()
   merchantAddress?: string;
 
-  @IsOptional()
+ 
   @IsString()
   telephone?: string;
 
-  @IsOptional()
+
   @IsString()
   merchantUrl?: string;
 
