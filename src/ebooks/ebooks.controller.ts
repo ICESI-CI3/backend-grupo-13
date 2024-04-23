@@ -10,6 +10,7 @@ import { Roles } from 'src/auth/decorator/roles.decorator';
 import { RoleEnum } from 'src/auth/enum/role.enum';
 import { VisualizeEbookDto } from './dto/visualize-ebook.dto';
 import { InfoEbookDto } from './dto/info-ebook.dto';
+import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('ebooks')
@@ -80,9 +81,9 @@ export class EbooksController {
     return this.ebooksService.remove(id);
   }
 
-
-  public async assignEbookToReader( userId:string, ebookId: string ){
-    return this.ebooksService.assignEbookToReader(userId, ebookId);
+  @Post('/ebookReader')
+  public async assignEbookToReader(@Body() createEbookReaderDto: CreateEbookReaderDto){
+    return this.ebooksService.assignEbookToReader(createEbookReaderDto);
   }
 
   @Get('/:readerId')

@@ -7,6 +7,7 @@ import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { Wish } from './entities/wish.entity';
 import { WishListDto } from './dto/wishlist';
 import { AuthService } from 'src/auth/auth.service';
+import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 
 @Injectable()
 export class EbooksService {
@@ -142,11 +143,11 @@ export class EbooksService {
     return result;
   }
 
-  public async assignEbookToReader(readerId: string, ebookId: string) {
+  public async assignEbookToReader(createEbookReaderDto: CreateEbookReaderDto) {
 
     const newEbook = this.ebookReaderRepository.create({
-      readerId,
-      ebookId
+      readerId:createEbookReaderDto.userId,
+      ebookId:createEbookReaderDto.ebookId
     });
 
     await this.ebookReaderRepository.save(newEbook);
