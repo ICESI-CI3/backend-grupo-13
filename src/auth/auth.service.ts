@@ -10,7 +10,7 @@ import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { validateUuid } from 'src/utils/validateUuid';
+import { validateUuid } from '../utils/validateUuid';
 
 
 @Injectable()
@@ -176,17 +176,27 @@ export class AuthService {
   }
 
   public async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.getUserById(id); 
-    const updatedUser = Object.assign(user, updateUserDto);
-    await this.userRepository.save(updatedUser);
-    return updatedUser;
+    try {
+      validateUuid(id);
+      const user = await this.getUserById(id); 
+      const updatedUser = Object.assign(user, updateUserDto);
+      await this.userRepository.save(updatedUser);
+      return updatedUser;
+    } catch (error) {
+        throw new NotFoundException(`Error finding user: ${error.message}`);
+    }
   }
 
   public async remove(id: string): Promise<DeleteResult> {
-    const result = await this.userRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
+    try {
+      validateUuid(id);
+      const result = await this.userRepository.delete(id);
+      if (result.affected === 0) {
+        throw new NotFoundException(`User with ID ${id} not found.`);
+      }
+      return result;
+    } catch (error) {
+        throw new NotFoundException(`Error finding user: ${error.message}`);
     }
-    return result;
   }
 }
