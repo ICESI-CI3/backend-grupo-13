@@ -10,6 +10,7 @@ import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { validateUuid } from 'src/utils/validateUuid';
 
 
 @Injectable()
@@ -122,9 +123,20 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
-  async getUserById(id: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { id } });
-  }
+  public async getUserById(id: string): Promise<User | undefined> {
+    try {
+        validateUuid(id);
+
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) {
+            console.error(`User with ID ${id} not found.`);
+        }
+        return user;
+    } catch (error) {
+        console.error(`Error finding user by ID: ${error.message}`);
+        throw new NotFoundException(`Error finding user: ${error.message}`);
+    }
+}
 
   async getReaderByUser(userId: string) {
     return this.readerRepository.findOne({ where: { userId } });
