@@ -59,6 +59,18 @@ export class AuthService {
         case 'Admin':
           rol = RoleEnum.ADMIN;
           break;
+        default:
+          throw new Error('Not a valid role');
+      }
+
+      if(rol==RoleEnum.USER){
+        if(createUserDto.favoriteGenre == null || createUserDto.bookList == null){
+          throw new Error('Missing attributes for a reader');
+        }
+      }else if(rol==RoleEnum.AUTHOR){
+        if(createUserDto.penName == null || createUserDto.biography == null || createUserDto.booksWritten == null){
+          throw new Error('Missing attributes for a author');
+        }
       }
 
       const user = await this.userRepository.create({
