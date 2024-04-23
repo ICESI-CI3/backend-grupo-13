@@ -82,7 +82,7 @@ export class PaymentController {
 
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Get(':id')
+  @Get('/:id')
   async getTransactionById(@Param('id') id: string): Promise<Transaction> {
       return await this.paymentService.getTransactionById(id);
   }
