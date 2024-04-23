@@ -51,10 +51,13 @@ export class AuthService {
       let rol;
       switch (role) {
         case 'Reader':
-          rol = RoleEnum.USER
+          rol = RoleEnum.USER;
           break;
         case 'Author':
-          rol = RoleEnum.AUTHOR
+          rol = RoleEnum.AUTHOR;
+          break;
+        case 'Admin':
+          rol = RoleEnum.ADMIN;
           break;
       }
 
