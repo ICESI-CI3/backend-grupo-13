@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable, forwardRef } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, forwardRef, UseGuards, Get, Req, Param, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { CreateTransactionFormDto } from 'src/payment/dto/create-transaction-for
 import { AuthService } from 'src/auth/auth.service';
 import { Ebook } from 'src/ebooks/entities/ebook.entity';
 import { validateUuid } from '../utils/validateUuid';
+
 
 @Injectable()
 export class OrderService {
@@ -84,4 +85,64 @@ export class OrderService {
   private calculateTotalAmount(ebooks: Ebook[]): number {
     return ebooks.reduce((total, ebook) => total + ebook.price, 0);
   }
+  async getAllOrders(): Promise<Order[]> {
+    return this.orderRepository.find();
+  }
+
+  async getOrderById(id: string): Promise<Order> {
+    try {
+        validateUuid(id);
+
+        const transaction = await this.orderRepository.findOne({ where: { referenceCode: id } });
+
+        if (!transaction) {
+            throw new NotFoundException(`Transaction with ID ${id} not found.`);
+        }
+        return transaction;
+    } catch (error) {
+        console.error(`Error finding transaction by ID: ${error.message}`);
+        throw new HttpException({
+            status: HttpStatus.BAD_REQUEST,
+            error: `Error finding transaction: ${error.message}`,
+        }, HttpStatus.BAD_REQUEST);
+    }
+    
+}
+async getUserOrders(userId: string): Promise<Order[]> {
+  try {
+    validateUuid(userId);
+  const transactions = await this.orderRepository.find({where: {user: { id: userId }}
+  });
+  if (!transactions) {
+      throw new NotFoundException(`Transactions for user ID ${userId} not found.`);
+  }
+  return transactions;
+} catch (error) {
+  console.error(`Error finding transaction by ID: ${error.message}`);
+  throw new HttpException({
+      status: HttpStatus.BAD_REQUEST,
+      error: `Error finding transaction: ${error.message}`,
+  }, HttpStatus.BAD_REQUEST);
+}
+}
+
+
+async getUserOrderById(userId: string, orderId: string): Promise<Order> {
+  try {
+    validateUuid(userId);
+    validateUuid(orderId);
+  const transaction = await this.orderRepository.findOne({where: { referenceCode: orderId, user: { id: userId } },});
+  if (!transaction) {
+      throw new NotFoundException(`Transaction with ID ${orderId} for user ID ${userId} not found.`);
+  }
+  return transaction;
+} catch (error) {
+  console.error(`Error finding transaction by ID: ${error.message}`);
+  throw new HttpException({
+      status: HttpStatus.BAD_REQUEST,
+      error: `Error finding transaction: ${error.message}`,
+  }, HttpStatus.BAD_REQUEST);
+}
+}
+  
 }

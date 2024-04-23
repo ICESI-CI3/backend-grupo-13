@@ -13,6 +13,12 @@ import { Roles } from './decorator/roles.decorator';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+  
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/session')
+  getProfile(@Req() req):Promise<User> {
+      return req.user;
+  }
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto): Promise<{ access_token: string }> {
@@ -66,10 +72,6 @@ export class AuthController {
     return this.authService.remove(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('/session')
-  getProfile(@Req() req):Promise<User> {
-      return req.user;
-  }
+ 
   
 }
