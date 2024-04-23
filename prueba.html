@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting to Payment...</title>
+</head>
+
+<body onload="document.getElementById('payuForm').submit();">
+    <form id="payuForm" action="https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/" method="post">
+        <input type="hidden" name="merchantId" value="508029" />
+        <input type="hidden" name="accountId" value="512321" />
+        <input type="hidden" name="description" value="undefined" />
+        <input type="hidden" name="referenceCode" value="73501eff-97be-4aa4-82f9-1249aeb3e7e2" />
+        <input type="hidden" name="amount" value="20000" />
+        <input type="hidden" name="tax" value="3800" />
+        <input type="hidden" name="taxReturnBase" value="16200" />
+        <input type="hidden" name="currency" value="COP" />
+        <input type="hidden" name="signature" value="b688bb0c4a3417a478b6cbc05eba0516" />
+        <input name="test" type="hidden" value="1">
+        <input type="hidden" name="responseUrl" value="http://localhost:3000/payments/payu-response" />
+        <input type="hidden" name="confirmationUrl" value="http://localhost:3000/payments/payu-confirmation" />
+        <input type="hidden" name="buyerEmail" value="kk@example.com" />
+    </form>
+</body>
+
+</html>

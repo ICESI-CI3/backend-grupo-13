@@ -1,45 +1,62 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import { Controller, Post, Body, Res, Get, Query, HttpException, HttpStatus, Param } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Response } from 'express';
-import * as dotenv from 'dotenv';
-dotenv.config();
+import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
 
 @Controller('payments')
 export class PaymentController {
-  constructor(private paymentService: PaymentService) {}
+  constructor(
+    private readonly paymentService: PaymentService,
+   ) {}
 
   @Post('payu-payment')
-  async createPayuPayment(@Body() createPaymentDto: CreatePaymentDto, @Res() res: Response) {
-    const paymentData = this.paymentService.generatePaymentLink(createPaymentDto.amount, createPaymentDto.firstName, createPaymentDto.email);
-    
-    res.send(`hola
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Redirecting to Payment...</title>
-      </head>
-      <body onload="document.getElementById('payuForm').submit();">
-          <form id="payuForm" action="${paymentData.url}" method="post">
-              <input type="hidden" name="merchantId" value="${process.env.PAYU_MERCHANT_ID}" />
-              <input type="hidden" name="accountId" value="${process.env.PAYU_ACCOUNT_ID}" />
-              <input type="hidden" name="description" value="Payment for products" />
-              <input type="hidden" name="referenceCode" value="${paymentData.txnId}" />
-              <input type="hidden" name="amount" value="${paymentData.amount}" />
-              <input type="hidden" name="tax" value="0" />
-              <input type="hidden" name="taxReturnBase" value="0" />
-              <input type="hidden" name="currency" value="USD" />
-              <input type="hidden" name="signature" value="${paymentData.hash}" />
-              <input type="hidden" name="responseUrl" value="${process.env.PAYU_RESPONSE_URL}" />
-              <input type="hidden" name="confirmationUrl" value="${process.env.PAYU_CONFIRMATION_URL}" />
-              <input type="hidden" name="buyerEmail" value="${paymentData.email}" />
-          </form>
-      </body>
-      </html>
-    `);
+  async createPayuPayment(@Body() createTransactionFormDto: CreateTransactionFormDto, @Res() res: Response) {
+    const paymentData = this.paymentService.generatePaymentLink(createTransactionFormDto);
+    res.send(paymentData);
+  }
+  @Get('payu-response')
+  async handleResponse(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
+    console.log("Response")
+    try {
+      if (transactionData.message === 'APPROVED') {
+        const transaction = await this.paymentService.createTransaction(transactionData);
+        const order = await this.paymentService.findOrderByReferenceCode(transactionData.referenceCode);
+        
+
+      if (!order) {
+        throw new Error('Order not found');
+      }
+      
+      await this.paymentService.processOrderBooks(order);
+      
+      return  res.json(transaction);
+    }
+    return  res.json({message: 'Transaccion no aprovada'});
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process transaction', details: error.message });
+    }
+  }
+  @Get('payu-confirmation')
+  async handleConfirmation(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
+    console.log("confirmation")
+    try {
+      if (transactionData.message === 'APPROVED') {
+        const transaction = await this.paymentService.createTransaction(transactionData);
+        const order = await this.paymentService.findOrderByReferenceCode(transactionData.referenceCode);
+        
+
+      if (!order) {
+        throw new Error('Order not found');
+      }
+      
+      await this.paymentService.processOrderBooks(order);
+      
+      return  res.json(transaction);
+    }
+    return  res.json({message: 'Transaccion no aprovada'});
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process transaction', details: error.message });
+    }
   }
 }
-

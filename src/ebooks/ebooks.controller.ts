@@ -2,7 +2,7 @@ import { Controller, Get, Body, Patch, Param, Delete, UseGuards, HttpException, 
 import { AuthGuard } from '@nestjs/passport';
 import { DeleteResult } from 'typeorm';
 import { EbooksService } from './ebooks.service';
-import { Ebook } from './entities/ebook.entity';
+import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
@@ -10,6 +10,7 @@ import { Roles } from 'src/auth/decorator/roles.decorator';
 import { RoleEnum } from 'src/auth/enum/role.enum';
 import { VisualizeEbookDto } from './dto/visualize-ebook.dto';
 import { InfoEbookDto } from './dto/info-ebook.dto';
+import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('ebooks')
@@ -41,7 +42,7 @@ export class EbooksController {
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
-  @Get(':id')
+  @Get('info/:id')
   public async findById(@Param('id') id: string): Promise<InfoEbookDto> {
     const ebook = await this.ebooksService.findById(id);
     if (!ebook) {
@@ -51,7 +52,7 @@ export class EbooksController {
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
-  @Get(':info/id')
+  @Get('visualize/:id')
   public async visualizeById(@Param('id') id: string): Promise<VisualizeEbookDto> {
     const ebook = await this.ebooksService.findById(id);
     if (!ebook) {
@@ -80,9 +81,9 @@ export class EbooksController {
     return this.ebooksService.remove(id);
   }
 
-
-  public async assignEbookToReader( userId:string, ebookId: string ){
-    return this.ebooksService.assignEbookToReader(userId, ebookId);
+  @Post('/ebookReader')
+  public async assignEbookToReader(@Body() createEbookReaderDto: CreateEbookReaderDto):Promise<EbooksReader>{
+    return this.ebooksService.assignEbookToReader(createEbookReaderDto);
   }
 
   @Get('/:readerId')

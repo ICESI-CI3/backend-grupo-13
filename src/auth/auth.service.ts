@@ -10,6 +10,7 @@ import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { validateUuid } from 'src/utils/validateUuid';
 
 
 @Injectable()
@@ -51,11 +52,26 @@ export class AuthService {
       let rol;
       switch (role) {
         case 'Reader':
-          rol = RoleEnum.USER
+          rol = RoleEnum.USER;
           break;
         case 'Author':
-          rol = RoleEnum.AUTHOR
+          rol = RoleEnum.AUTHOR;
           break;
+        case 'Admin':
+          rol = RoleEnum.ADMIN;
+          break;
+        default:
+          throw new Error('Not a valid role');
+      }
+
+      if(rol==RoleEnum.USER){
+        if(createUserDto.favoriteGenre == null || createUserDto.bookList == null){
+          throw new Error('Missing attributes for a reader');
+        }
+      }else if(rol==RoleEnum.AUTHOR){
+        if(createUserDto.penName == null || createUserDto.biography == null || createUserDto.booksWritten == null){
+          throw new Error('Missing attributes for a author');
+        }
       }
 
       const user = await this.userRepository.create({
@@ -107,9 +123,20 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
-  async getUserById(id: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { id } });
-  }
+  public async getUserById(id: string): Promise<User | undefined> {
+    try {
+        validateUuid(id);
+
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) {
+            console.error(`User with ID ${id} not found.`);
+        }
+        return user;
+    } catch (error) {
+        console.error(`Error finding user by ID: ${error.message}`);
+        throw new NotFoundException(`Error finding user: ${error.message}`);
+    }
+}
 
   async getReaderByUser(userId: string) {
     return this.readerRepository.findOne({ where: { userId } });
