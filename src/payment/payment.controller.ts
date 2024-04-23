@@ -2,13 +2,13 @@ import { Controller, Post, Body, Res, Get, Query, HttpException, HttpStatus, Par
 import { PaymentService } from './payment.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Response } from 'express';
-import { OrderService } from '../order/order.service';
 import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
 
 @Controller('payments')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService,
-    private readonly orderService: OrderService) {}
+  constructor(
+    private readonly paymentService: PaymentService,
+   ) {}
 
   @Post('payu-payment')
   async createPayuPayment(@Body() createTransactionFormDto: CreateTransactionFormDto, @Res() res: Response) {
@@ -21,13 +21,14 @@ export class PaymentController {
       const transaction = await this.paymentService.createTransaction(transactionData);
 
       if (transactionData.message === 'APPROVED') {
-        const order = await this.orderService.findOrderByReferenceCode(transactionData.referenceCode);
-      
+        const order = await this.paymentService.findOrderByReferenceCode(transactionData.referenceCode);
+        
+
       if (!order) {
         throw new Error('Order not found');
       }
       
-      await this.orderService.processOrderBooks(order);
+      await this.paymentService.processOrderBooks(order);
       }
       res.json(transaction);
     } catch (error) {
