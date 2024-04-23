@@ -172,7 +172,10 @@ export class EbooksService {
   async addEbooksToReader(readerId: string, ebooks: Ebook[]): Promise<void> {
     console.log(readerId, "A ", ebooks);
     for (const ebook of ebooks) {
-      this.assignEbookToReader(readerId,ebook.id);
+      const tem = new CreateEbookReaderDto();
+      tem.ebookId=ebook.id
+      tem.userId=readerId
+      this.assignEbookToReader(tem);
     }
   }
   
