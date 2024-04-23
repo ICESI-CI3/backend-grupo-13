@@ -10,7 +10,7 @@ import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { validateUuid } from 'src/utils/validateUuid';
+import { validateUuid } from '../utils/validateUuid';
 
 
 @Injectable()

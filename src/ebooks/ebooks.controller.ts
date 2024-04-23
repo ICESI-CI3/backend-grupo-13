@@ -5,9 +5,9 @@ import { EbooksService } from './ebooks.service';
 import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { CreateEbookDto } from './dto/create-ebook.dto';
-import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { Roles } from 'src/auth/decorator/roles.decorator';
-import { RoleEnum } from 'src/auth/enum/role.enum';
+import { RolesGuard } from '../auth/guard/roles.guard';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { RoleEnum } from '../auth/enum/role.enum';
 import { VisualizeEbookDto } from './dto/visualize-ebook.dto';
 import { InfoEbookDto } from './dto/info-ebook.dto';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
@@ -62,7 +62,7 @@ export class EbooksController {
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
-  @Patch(':id')
+  @Patch('visualize/:id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateEbookDto): Promise<Ebook> {
     const ebook = await this.ebooksService.findById(id);
     if (!ebook) {

@@ -2,12 +2,12 @@ import { HttpException, HttpStatus, Inject, Injectable, forwardRef, UseGuards, G
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { Repository } from 'typeorm';
-import { EbooksService } from 'src/ebooks/ebooks.service';
+import { EbooksService } from '../ebooks/ebooks.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { PaymentService } from 'src/payment/payment.service';
-import { CreateTransactionFormDto } from 'src/payment/dto/create-transaction-form.dto';
-import { AuthService } from 'src/auth/auth.service';
-import { Ebook } from 'src/ebooks/entities/ebook.entity';
+import { PaymentService } from '../payment/payment.service';
+import { CreateTransactionFormDto } from '../payment/dto/create-transaction-form.dto';
+import { AuthService } from '../auth/auth.service';
+import { Ebook } from '../ebooks/entities/ebook.entity';
 import { validateUuid } from '../utils/validateUuid';
 
 

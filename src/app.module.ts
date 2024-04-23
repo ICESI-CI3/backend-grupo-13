@@ -10,8 +10,6 @@ import { SeedModule } from './seed/seed.module';
 import { PaymentModule } from './payment/payment.module';
 import { OrderModule } from './order/order.module';
 
-
-
 @Module({
   imports: [ 
     TypeOrmModule.forRootAsync({
