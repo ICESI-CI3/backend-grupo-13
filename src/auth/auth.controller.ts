@@ -10,7 +10,6 @@ import { RolesGuard } from './guard/roles.guard';
 import { RoleEnum } from './enum/role.enum';
 import { Roles } from './decorator/roles.decorator';
 
-@UseGuards(RolesGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -31,22 +30,22 @@ export class AuthController {
       return this.authService.checkAuthStatus(req.user);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @UseGuards(AuthGuard('jwt'))
   @Get('/:id')
   async getUserById(@Param('id') id: string): Promise<User | undefined> {
       return this.authService.getUserById(id);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @UseGuards(AuthGuard('jwt'))
   @Get('/')
   async getAllUsers(): Promise<User[]> {
       return this.authService.getAllUsers();
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @UseGuards(AuthGuard('jwt'))
   @Patch('/:id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.authService.getUserById(id);
@@ -56,8 +55,8 @@ export class AuthController {
     return this.authService.update(id, updateUserDto);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @UseGuards(AuthGuard('jwt'))
   @Delete('/:id')
   public async remove(@Param('id') id: string): Promise<DeleteResult> {
     const user = await this.authService.getUserById(id);
