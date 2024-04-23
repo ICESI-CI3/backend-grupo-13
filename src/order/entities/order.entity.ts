@@ -8,7 +8,7 @@ export class Order {
   referenceCode: string;
 
   @ManyToOne(() => User, user => user.orders)
-  @JoinColumn({ name: 'reader_id' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToMany(() => Ebook)

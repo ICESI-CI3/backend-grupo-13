@@ -16,11 +16,11 @@ export class PaymentController {
     res.send(paymentData);
   }
   @Get('payu-response')
-  async handleResponse(@Body() transactionData: CreateTransactionDto, @Res() res: Response) {
+  async handleResponse(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
+    console.log("Response")
     try {
-      const transaction = await this.paymentService.createTransaction(transactionData);
-
       if (transactionData.message === 'APPROVED') {
+        const transaction = await this.paymentService.createTransaction(transactionData);
         const order = await this.paymentService.findOrderByReferenceCode(transactionData.referenceCode);
         
 
@@ -29,11 +29,34 @@ export class PaymentController {
       }
       
       await this.paymentService.processOrderBooks(order);
-      }
-      res.json(transaction);
+      
+      return  res.json(transaction);
+    }
+    return  res.json({message: 'Transaccion no aprovada'});
     } catch (error) {
       res.status(500).json({ message: 'Failed to process transaction', details: error.message });
     }
   }
-  
+  @Get('payu-confirmation')
+  async handleConfirmation(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
+    console.log("confirmation")
+    try {
+      if (transactionData.message === 'APPROVED') {
+        const transaction = await this.paymentService.createTransaction(transactionData);
+        const order = await this.paymentService.findOrderByReferenceCode(transactionData.referenceCode);
+        
+
+      if (!order) {
+        throw new Error('Order not found');
+      }
+      
+      await this.paymentService.processOrderBooks(order);
+      
+      return  res.json(transaction);
+    }
+    return  res.json({message: 'Transaccion no aprovada'});
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process transaction', details: error.message });
+    }
+  }
 }
