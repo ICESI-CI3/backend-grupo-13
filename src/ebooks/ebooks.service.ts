@@ -6,9 +6,9 @@ import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { Wish } from './entities/wish.entity';
 import { WishListDto } from './dto/wishlist';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
-import { validateUuid } from 'src/utils/validateUuid';
+import { validateUuid } from '../utils/validateUuid';
 
 @Injectable()
 export class EbooksService {

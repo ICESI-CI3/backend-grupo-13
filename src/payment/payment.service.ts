@@ -6,8 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from './entities/transaction.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
-import { OrderService } from 'src/order/order.service';
-import { Order } from 'src/order/entities/order.entity';
+import { OrderService } from '../order/order.service';
+import { Order } from '../order/entities/order.entity';
 
 @Injectable()
 export class PaymentService {
