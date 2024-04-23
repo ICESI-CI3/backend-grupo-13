@@ -169,17 +169,9 @@ export class EbooksService {
   }
 
   async addEbooksToReader(readerId: string, ebooks: Ebook[]): Promise<void> {
+    console.log(readerId, "A ", ebooks);
     for (const ebook of ebooks) {
-      const existingEntry = await this.ebooksReaderRepository.findOne({
-        where: { readerId: readerId, ebookId: ebook.id },
-      });
-  
-      if (!existingEntry) {
-        const newEntry = new EbooksReader();
-        newEntry.readerId = readerId;
-        newEntry.ebookId = ebook.id;
-        await this.ebooksReaderRepository.save(newEntry);
-      }
+      this.assignEbookToReader(readerId,ebook.id);
     }
   }
   

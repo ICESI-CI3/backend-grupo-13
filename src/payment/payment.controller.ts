@@ -16,11 +16,11 @@ export class PaymentController {
     res.send(paymentData);
   }
   @Get('payu-response')
-  async handleResponse(@Body() transactionData: CreateTransactionDto, @Res() res: Response) {
-    try {
-      const transaction = await this.paymentService.createTransaction(transactionData);
+  async handleResponse(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
 
+    try {
       if (transactionData.message === 'APPROVED') {
+        const transaction = await this.paymentService.createTransaction(transactionData);
         const order = await this.paymentService.findOrderByReferenceCode(transactionData.referenceCode);
         
 
@@ -29,8 +29,10 @@ export class PaymentController {
       }
       
       await this.paymentService.processOrderBooks(order);
-      }
+      
       res.json(transaction);
+    }
+    res.json({message: 'Transaccion no aprovada'});
     } catch (error) {
       res.status(500).json({ message: 'Failed to process transaction', details: error.message });
     }

@@ -1,5 +1,5 @@
 import { Author } from 'src/auth/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToMany, ManyToOne } from 'typeorm';
 
 @Entity()
 export class Ebook {
@@ -13,7 +13,7 @@ export class Ebook {
   @Column()
   publisher: string;
 
-  @OneToOne(() => Author)
+  @ManyToOne(() => Author)
   @JoinColumn()
   author: Author;
 

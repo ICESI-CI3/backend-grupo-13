@@ -9,16 +9,16 @@ export class Transaction {
   merchantId: string;
 
   @Column()
-  merchantName: string;
+  merchant_name: string;
 
   @Column()
-  merchantAddress: string;
+  merchant_address: string;
 
   @Column()
   telephone: string;
 
   @Column()
-  merchantUrl: string;
+  merchant_url: string;
 
   @Column()
   transactionState: string;
@@ -30,7 +30,7 @@ export class Transaction {
   referenceCode: string;
 
   @Column()
-  referencePol: string;
+  reference_pol: string;
 
   @Column()
   transactionId: string;
@@ -39,13 +39,13 @@ export class Transaction {
   description: string;
 
   @Column()
-  paymentMethod: string;
+  lapPaymentMethod: string;
 
-  @Column()
-  amount: number;
+  @Column({ type: 'float' })
+  TX_VALUE: number;
 
-  @Column()
-  tax: number;
+  @Column({ type: 'float' })
+  TX_TAX: number;
 
   @Column()
   currency: string;
@@ -53,8 +53,6 @@ export class Transaction {
   @Column()
   buyerEmail: string;
 
-  @Column()
-  authorizationCode: string;
 
   @Column({ type: 'date' })
   processingDate: Date;
