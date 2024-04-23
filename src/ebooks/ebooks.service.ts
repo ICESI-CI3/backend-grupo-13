@@ -143,7 +143,7 @@ export class EbooksService {
     return result;
   }
 
-  public async assignEbookToReader(createEbookReaderDto: CreateEbookReaderDto) {
+  public async assignEbookToReader(createEbookReaderDto: CreateEbookReaderDto):Promise<EbooksReader> {
 
     const newEbook = this.ebookReaderRepository.create({
       readerId:createEbookReaderDto.userId,

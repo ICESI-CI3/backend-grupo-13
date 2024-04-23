@@ -2,7 +2,7 @@ import { Controller, Get, Body, Patch, Param, Delete, UseGuards, HttpException, 
 import { AuthGuard } from '@nestjs/passport';
 import { DeleteResult } from 'typeorm';
 import { EbooksService } from './ebooks.service';
-import { Ebook } from './entities/ebook.entity';
+import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
@@ -82,7 +82,7 @@ export class EbooksController {
   }
 
   @Post('/ebookReader')
-  public async assignEbookToReader(@Body() createEbookReaderDto: CreateEbookReaderDto){
+  public async assignEbookToReader(@Body() createEbookReaderDto: CreateEbookReaderDto):Promise<EbooksReader>{
     return this.ebooksService.assignEbookToReader(createEbookReaderDto);
   }
 
