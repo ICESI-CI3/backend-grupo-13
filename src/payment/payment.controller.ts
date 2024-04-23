@@ -27,26 +27,6 @@ export class PaymentController {
        return this.paymentService.getUserTransactions(req.user.userId);
    }
 
-   @UseGuards(AuthGuard('jwt'),RolesGuard)
-   @Roles(RoleEnum.ADMIN)
-   @Get()  
-  async getAllTransactions(): Promise<Transaction[]> {
-      return await this.paymentService.getAllTransactions();
-  }
-
-  @UseGuards(AuthGuard('jwt'),RolesGuard)
-  @Roles(RoleEnum.ADMIN)
-  @Get(':id')
-  async getTransactionById(@Param('id') id: string): Promise<Transaction> {
-      return await this.paymentService.getTransactionById(id);
-  }
- 
-   //Este metodo solo es para probar una orden, realmente no se utiliza normalmente
-  @Post('payu-payment')
-  async createPayuPayment(@Body() createTransactionFormDto: CreateTransactionFormDto, @Res() res: Response) {
-    const paymentData = this.paymentService.generatePaymentLink(createTransactionFormDto);
-    res.send(paymentData);
-  }
   //Funciona para cuando el usuario le da el boton de mirar volver a pagina despues de que se acaba la transaccion en payu
   @Get('payu-response')
   async handleResponse(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
@@ -92,5 +72,18 @@ export class PaymentController {
     } catch (error) {
       res.status(500).json({ message: 'Failed to process transaction', details: error.message });
     }
+  }
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+   @Roles(RoleEnum.ADMIN)
+   @Get()  
+  async getAllTransactions(): Promise<Transaction[]> {
+      return await this.paymentService.getAllTransactions();
+  }
+
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @Get(':id')
+  async getTransactionById(@Param('id') id: string): Promise<Transaction> {
+      return await this.paymentService.getTransactionById(id);
   }
 }
