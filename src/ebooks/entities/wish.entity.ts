@@ -1,4 +1,4 @@
-import { Reader } from 'src/auth/entities/user.entity';
+import { Reader } from '../../auth/entities/user.entity';
 import { Entity, OneToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { Ebook } from './ebook.entity';
 

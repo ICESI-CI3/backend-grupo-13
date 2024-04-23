@@ -6,7 +6,7 @@ import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
 import { Wish } from './entities/wish.entity';
 import { WishListDto } from './dto/wishlist';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class EbooksService {
