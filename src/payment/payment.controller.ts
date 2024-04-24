@@ -4,10 +4,10 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Response } from 'express';
 import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
 import { Transaction } from './entities/transaction.entity';
-import { Roles } from 'src/auth/decorator/roles.decorator';
+import { Roles } from '../auth/decorator/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
-import { RoleEnum } from 'src/auth/enum/role.enum';
-import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { RoleEnum } from '../auth/enum/role.enum';
+import { RolesGuard } from '../auth/guard/roles.guard';
 
 
 @Controller('payments')

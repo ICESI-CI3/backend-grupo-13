@@ -8,7 +8,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validateUuid } from '../utils/validateUuid';
 
