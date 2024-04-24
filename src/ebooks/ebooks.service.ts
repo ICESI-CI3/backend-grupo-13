@@ -197,7 +197,6 @@ export class EbooksService {
   }
 
   public async assignEbookToReader(createEbookReaderDto: CreateEbookReaderDto): Promise<EbooksReader> {
-
     const newEbook = this.ebookReaderRepository.create({
       readerId: createEbookReaderDto.userId,
       ebookId: createEbookReaderDto.ebookId
@@ -239,7 +238,6 @@ export class EbooksService {
       }
     }
   }
-
 
   async findBy(ids: string[]): Promise<Ebook[]> {
     return await this.ebooksRepository.find({
