@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Author, Reader, User } from 'src/auth/entities/user.entity';
-import { RoleEnum } from 'src/auth/enum/role.enum';
-import { Ebook } from 'src/ebooks/entities/ebook.entity';
-import { Wish } from 'src/ebooks/entities/wish.entity';
-import { Order } from 'src/order/entities/order.entity';
-import { Transaction } from 'src/payment/entities/transaction.entity';
+import { Author, Reader, User } from '../auth/entities/user.entity';
+import { RoleEnum } from '../auth/enum/role.enum';
+import { Ebook } from '../ebooks/entities/ebook.entity';
+import { Wish } from '../ebooks/entities/wish.entity';
+import { Order } from '../order/entities/order.entity';
+import { Transaction } from '../payment/entities/transaction.entity';
 import { Repository } from 'typeorm';
 
 
