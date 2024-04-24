@@ -42,9 +42,9 @@ export class OrderService {
     return await this.paymentService.generatePaymentLink(transactionDto);
 
   }
-  async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
+  async createOrder(userId:string,createOrderDto: CreateOrderDto): Promise<Order> {
     try {
-        const { userId, ebookIds } = createOrderDto;
+        const { ebookIds } = createOrderDto;
         validateUuid(userId);
         for (const book of ebookIds) {
             validateUuid(book);
@@ -55,9 +55,19 @@ export class OrderService {
             throw new Error('Reader not found');
         }
 
-        const ebooks = await this.ebookService.findBy(ebookIds);
+        const ownedEbookIds = await this.ebookService.findAllEbooksByReader(userId);
+        const ebooksToPurchaseIds = ebookIds.filter(id => 
+          !ownedEbookIds.some(ebook => ebook.id === id)
+        );
+        
 
-        if (ebooks.length !== ebookIds.length) {
+        if (ebooksToPurchaseIds.length === 0) {
+            throw new Error('All requested eBooks are already owned');
+        }
+
+        const ebooks = await this.ebookService.findBy(ebooksToPurchaseIds);
+
+        if (ebooks.length !== ebooksToPurchaseIds.length) {
             throw new Error('Not all requested eBooks are available');
         }
 
@@ -79,9 +89,6 @@ export class OrderService {
     }
 }
 
-
-
-
   private calculateTotalAmount(ebooks: Ebook[]): number {
     return ebooks.reduce((total, ebook) => total + ebook.price, 0);
   }
@@ -93,17 +100,18 @@ export class OrderService {
     try {
         validateUuid(id);
 
-        const transaction = await this.orderRepository.findOne({ where: { referenceCode: id } });
+        const order = await this.orderRepository.findOne({ where: { referenceCode: id },
+          relations: ['user', 'ebooks'] });
 
-        if (!transaction) {
-            throw new NotFoundException(`Transaction with ID ${id} not found.`);
+        if (!order) {
+            throw new NotFoundException(` Order with ID ${id} not found.`);
         }
-        return transaction;
+        return order;
     } catch (error) {
-        console.error(`Error finding transaction by ID: ${error.message}`);
+        console.error(`Error finding order by ID: ${error.message}`);
         throw new HttpException({
             status: HttpStatus.BAD_REQUEST,
-            error: `Error finding transaction: ${error.message}`,
+            error: `Error finding order: ${error.message}`,
         }, HttpStatus.BAD_REQUEST);
     }
     
@@ -111,17 +119,17 @@ export class OrderService {
 async getUserOrders(userId: string): Promise<Order[]> {
   try {
     validateUuid(userId);
-  const transactions = await this.orderRepository.find({where: {user: { id: userId }}
-  });
-  if (!transactions) {
+  const orders = await this.orderRepository.find({where: {user: { id: userId }},
+    relations: ['user', 'ebooks']  });
+  if (!orders) {
       throw new NotFoundException(`Transactions for user ID ${userId} not found.`);
   }
-  return transactions;
+  return orders;
 } catch (error) {
-  console.error(`Error finding transaction by ID: ${error.message}`);
+  console.error(`Error finding order by ID: ${error.message}`);
   throw new HttpException({
       status: HttpStatus.BAD_REQUEST,
-      error: `Error finding transaction: ${error.message}`,
+      error: `Error finding order: ${error.message}`,
   }, HttpStatus.BAD_REQUEST);
 }
 }
@@ -131,16 +139,17 @@ async getUserOrderById(userId: string, orderId: string): Promise<Order> {
   try {
     validateUuid(userId);
     validateUuid(orderId);
-  const transaction = await this.orderRepository.findOne({where: { referenceCode: orderId, user: { id: userId } },});
-  if (!transaction) {
-      throw new NotFoundException(`Transaction with ID ${orderId} for user ID ${userId} not found.`);
+  const order = await this.orderRepository.findOne({where: { referenceCode: orderId, user: { id: userId } },
+    relations: ['user', 'ebooks']});
+  if (!order) {
+      throw new NotFoundException(` Order with ID ${orderId} for user ID ${userId} not found.`);
   }
-  return transaction;
+  return order;
 } catch (error) {
-  console.error(`Error finding transaction by ID: ${error.message}`);
+  console.error(`Error finding order by ID: ${error.message}`);
   throw new HttpException({
       status: HttpStatus.BAD_REQUEST,
-      error: `Error finding transaction: ${error.message}`,
+      error: `Error finding order: ${error.message}`,
   }, HttpStatus.BAD_REQUEST);
 }
 }

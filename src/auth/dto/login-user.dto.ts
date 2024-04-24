@@ -15,8 +15,4 @@ export class LoginUserDto {
   })
   password: string;
 
-  @IsNotEmpty()
-  @IsArray()
-  @IsString({ each: true })
-  roles: string[];
 }
