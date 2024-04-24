@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { EbooksModule } from './ebooks/ebooks.module';
-import { SeedModule } from './seed/seed.module';
+import { SeederModule } from './seed/seed.module';
 import { PaymentModule } from './payment/payment.module';
 import { OrderModule } from './order/order.module';
 
@@ -29,7 +29,7 @@ import { OrderModule } from './order/order.module';
     ConfigModule.forRoot({isGlobal: true,}), 
     AuthModule,
     EbooksModule,
-    SeedModule,
+    SeederModule,
     PaymentModule,
     OrderModule],
   controllers: [AppController],
