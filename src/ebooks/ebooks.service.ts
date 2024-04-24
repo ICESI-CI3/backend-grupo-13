@@ -128,8 +128,6 @@ export class EbooksService {
     }
   }
 
-
-
   public async findAll(): Promise<Ebook[]> {
     return this.ebooksRepository.find();
   }

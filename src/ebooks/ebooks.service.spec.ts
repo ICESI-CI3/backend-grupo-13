@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EbooksService } from './ebooks.service';
 import { AuthService } from '../auth/auth.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { Wish } from './entities/wish.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -40,19 +39,19 @@ describe('EbooksService', () => {
         {
           provide: AuthService,
           useValue: {
-            getUserById: jest.fn((value) => value).mockReturnValue({
-              id: "1",
+            getUserById: jest.fn().mockReturnValue({
+              id: "10A68e83-ee89-4739-9682-c2c803748f36",
               username: "user",
               password: "password",
               email: "email@domain.com",
               role: "Author",
             }),
-            getAuthorByUser: jest.fn((value) => value).mockReturnValue({
-              id: "1",
+            getAuthorByUser: jest.fn().mockReturnValue({
+              id: "10B68e83-ee89-4739-9682-c2c803748f36",
               userId: "1",
-              penName: "a",
-              biography: "a",
-              booksWritten: "a",
+              penName: "Author...",
+              biography: "Not that interesting",
+              booksWritten: "20",
             })
           },
         },
@@ -139,7 +138,7 @@ describe('EbooksService', () => {
 
     expect(updated).toBeDefined();
     expect(updated.publisher).toBe("newPublisher");
-    expect(updated.title).toBe("123");
+    expect(updated.title).toBe("The title");
 
   });
 
@@ -154,21 +153,116 @@ describe('EbooksService', () => {
     }
   });
 
-  it('should add an existing book to an existing-user\'s wishlist', async () => {
-    ebookRepository.delete = jest.fn().mockReturnValue({ affected: 1 });
-    try {
-      await service.remove("10f68e83-ee89-4739-9682-c2c803748f36");
+  it('should add an existing ebook to an existing-user\'s wishlist', async () => {
+    authService.getReaderByUser = jest.fn().mockReturnValue({
+      id: "00C68e83-ee89-4739-9682-c2c803748f36",
+      userId: "10A68e83-ee89-4739-9682-c2c803748f36",
+      favoriteGenre: "Fiction",
+      bookList: ""
+    })
+    ebookRepository.findOne = jest.fn().mockReturnValue(createdEbook);
+    wishRepository.create = jest.fn().mockImplementation((data) => { return { ...data, id: "22f68e83-ee89-4739-9682-c2c803748f36" } })
+    const wishListItem = await service.addToWishlist({ reader: "00C68e83-ee89-4739-9682-c2c803748f36", ebook: "10f68e83-ee89-4739-9682-c2c803748f36" })
+    expect(wishListItem).toBeDefined();
+    expect(wishListItem.reader.id).toBe("00C68e83-ee89-4739-9682-c2c803748f36");
+    expect(wishListItem.ebook.id).toBe("10f68e83-ee89-4739-9682-c2c803748f36");
+  });
 
-      fail("No exception thrown, no existing item to delete")
+  it('should not add a non existing ebook to an existing-user\'s wishlist', async () => {
+    try {
+      authService.getReaderByUser = jest.fn().mockReturnValue(createdReader)
+      ebookRepository.findOne = jest.fn().mockReturnValue(null);
+      wishRepository.create = jest.fn().mockImplementation((data) => { return { ...data, id: "22f68e83-ee89-4739-9682-c2c803748f36" } })
+      await service.addToWishlist({ reader: "00C68e83-ee89-4739-9682-c2c803748f36", ebook: "10f68e83-ee89-4739-9682-c2c803748f36" })
+
+      fail("No exception thrown, no book exists with that id")
     } catch (e) {
       expect(e).toBeDefined();
     }
   });
+
+
+  it('should not add a ebook to a non-reader-user\'s wishlist', async () => {
+    try {
+      authService.getUserById = jest.fn().mockReturnValue(null);
+      authService.getReaderByUser = jest.fn().mockReturnValue(createdReader)
+      ebookRepository.findOne = jest.fn().mockReturnValue(createdEbook);
+      wishRepository.create = jest.fn().mockImplementation((data) => { return { ...data, id: "22f68e83-ee89-4739-9682-c2c803748f36" } })
+      await service.addToWishlist({ reader: "00C68e83-ee89-4739-9682-c2c803748f36", ebook: "10f68e83-ee89-4739-9682-c2c803748f36" })
+
+      fail("No exception thrown, no book exists with that id")
+    } catch (e) {
+      expect(e).toBeDefined();
+    }
+  });
+
+  it('should not add a ebook to a non-existing-user\'s wishlist', async () => {
+    try {
+      authService.getReaderByUser = jest.fn().mockReturnValue(null)
+      ebookRepository.findOne = jest.fn().mockReturnValue(createdEbook);
+      wishRepository.create = jest.fn().mockImplementation((data) => { return { ...data, id: "22f68e83-ee89-4739-9682-c2c803748f36" } })
+      await service.addToWishlist({ reader: "00C68e83-ee89-4739-9682-c2c803748f36", ebook: "10f68e83-ee89-4739-9682-c2c803748f36" })
+
+      fail("No exception thrown, no book exists with that id")
+    } catch (e) {
+      expect(e).toBeDefined();
+    }
+  });
+
+  it('should delete an existing wishlist item', async () => {
+    authService.getReaderByUser = jest.fn().mockReturnValue(createdReader)
+    ebookRepository.findOne = jest.fn().mockReturnValue(createdEbook);
+    wishRepository.remove = jest.fn().mockReturnValue({ affected: 1 })
+
+    const delRes = await service.removeFromWishlist({ reader: "00C68e83-ee89-4739-9682-c2c803748f36", ebook: "10f68e83-ee89-4739-9682-c2c803748f36" })
+    expect(delRes.affected).toBe(1);
+  });
+
+  it('should not delete a non existing ebook from a wishlist', async () => {
+    try {
+      authService.getReaderByUser = jest.fn().mockReturnValue(createdReader)
+      ebookRepository.findOne = jest.fn().mockReturnValue(null);
+      wishRepository.remove = jest.fn().mockReturnValue({ affected: 1 })
+
+      await service.removeFromWishlist({ reader: "00C68e83-ee89-4739-9682-c2c803748f36", ebook: "10f68e83-ee89-4739-9682-c2c803748f36" })
+      fail("No exception thrown");
+    } catch (e) {
+      expect(e).toBeDefined();
+    }
+  });
+
+  it('should not delete a ebook from a wishlis linked to invalid reader', async () => {
+    try {
+      authService.getReaderByUser = jest.fn().mockReturnValue(null)
+      ebookRepository.findOne = jest.fn().mockReturnValue(createdEbook);
+      wishRepository.remove = jest.fn().mockReturnValue({ affected: 1 })
+
+      await service.removeFromWishlist({ reader: "00C68e83-ee89-4739-9682-c2c803748f36", ebook: "10f68e83-ee89-4739-9682-c2c803748f36" })
+      fail("No exception thrown");
+    } catch (e) {
+      expect(e).toBeDefined();
+    }
+  });
+
+  it('should find an existing ebook with its title', async () => {
+    ebookRepository.findOne = jest.fn().mockReturnValue(createdEbook);
+    const res = await service.findByTitle("The title");
+    expect(res).toBeDefined();
+    expect(res.title).toBe("The title");
+  });
+
+  it('should not find a non existing ebook by title', async () => {
+    ebookRepository.findOne = jest.fn().mockReturnValue(null);
+    const res = await service.findByTitle("The title");
+    expect(res).toBeNull();
+  });
 });
+
+
 
 const createdEbook = {
   id: "10f68e83-ee89-4739-9682-c2c803748f36",
-  title: "123",
+  title: "The title",
   publisher: "a",
   author: "90f68e83-ee89-4739-9682-c2c803748f36",
   overview: "a",
@@ -229,3 +323,10 @@ const createdEbooks = [
     "fileData": ""
   }
 ]
+
+const createdReader = {
+  id: "00C68e83-ee89-4739-9682-c2c803748f36",
+  userId: "10A68e83-ee89-4739-9682-c2c803748f36",
+  favoriteGenre: "Fiction",
+  bookList: ""
+}
