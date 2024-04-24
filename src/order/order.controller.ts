@@ -20,34 +20,51 @@ export class OrderController {
   
   @UseGuards(AuthGuard('jwt'),RolesGuard)
    @Get('/:orderId')
-   async getUserTransactionById(@Req() req,@Param('orderId') orderId: string): Promise<Order> {
-       return this.orderService.getUserOrderById(req.user.userId,orderId);
+   async getUserOrderById(@Req() req,@Param('orderId') orderId: string): Promise<Order> {
+    const order = await this.orderService.getUserOrderById(req.user.userId, orderId);
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found.`);
+    }
+    return order;
    }
  
    @UseGuards(AuthGuard('jwt'),RolesGuard)
    @Get('/')
-   async getUserTransactions(@Req() req): Promise<Order[]> {
-       return this.orderService.getUserOrders(req.user.userId);
+   async getUserOrders(@Req() req): Promise<Order[]> {
+        const order = await this.orderService.getUserOrders(req.user.userId);
+      if (!order) {
+        throw new NotFoundException(`Not Found orders by user ${req.user.userId}`);
+      }
+      return order;
+
    }
 
    @UseGuards(AuthGuard('jwt'),RolesGuard)
    @Roles(RoleEnum.ADMIN)
    @Get('/:userId/:orderId')  
-  async getOfUserTransactionById(@Param('orderId') orderId: string,@Param('userId') userId: string): Promise<Order> {
-      return await this.orderService.getUserOrderById(userId,orderId);
+  async getOfUserOrderById(@Param('orderId') orderId: string,@Param('userId') userId: string): Promise<Order> {
+    const order =  this.orderService.getUserOrderById(userId,orderId);
+    if (!order) {
+      throw new NotFoundException(`Not Found orders by user ${userId}`);
+    }
+    return order;
   }
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/all')  
- async getAllTransactions(): Promise<Order[]> {
+ async getAllOrders(): Promise<Order[]> {
      return await this.orderService.getAllOrders();
  }
 
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/:id')
-  async getTransactionById(@Param('id') id: string): Promise<Order> {
-      return await this.orderService.getOrderById(id); 
+  async getOrderById(@Param('id') id: string): Promise<Order> {
+      const order = await this.orderService.getOrderById(id); 
+      if (!order) {
+        throw new NotFoundException(`Not Found orders by user ${id}`);
+      }
+      return order;
   }
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)

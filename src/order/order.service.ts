@@ -81,7 +81,7 @@
           await this.orderRepository.save(order);
           return order;
       } catch (error) {
-          console.error(error.message); 
+
           throw new HttpException({
               status: HttpStatus.BAD_REQUEST,
               error: error.message,
@@ -108,7 +108,7 @@
           }
           return order;
       } catch (error) {
-          console.error(`Error finding order by ID: ${error.message}`);
+          
           throw new HttpException({
               status: HttpStatus.BAD_REQUEST,
               error: `Error finding order: ${error.message}`,
@@ -122,11 +122,11 @@
     const orders = await this.orderRepository.find({where: {user: { id: userId }},
       relations: ['user', 'ebooks']  });
     if (!orders) {
-        throw new NotFoundException(`Transactions for user ID ${userId} not found.`);
+        throw new NotFoundException(`Order for user ID ${userId} not found.`);
     }
     return orders;
   } catch (error) {
-    console.error(`Error finding order by ID: ${error.message}`);
+    
     throw new HttpException({
         status: HttpStatus.BAD_REQUEST,
         error: `Error finding order: ${error.message}`,
@@ -146,7 +146,7 @@
     }
     return order;
   } catch (error) {
-    console.error(`Error finding order by ID: ${error.message}`);
+    
     throw new HttpException({
         status: HttpStatus.BAD_REQUEST,
         error: `Error finding order: ${error.message}`,

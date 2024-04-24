@@ -28,7 +28,7 @@ export class PaymentService {
   private responseUrl: string;
   private confirmationUrl: string;
   private buyerEmail: string;
-  httpService: any;
+
 
   constructor(
     @InjectRepository(Transaction)
@@ -100,7 +100,12 @@ export class PaymentService {
   }
   
   async findOrderByReferenceCode(referenceCode:string): Promise<Order> {
-    return await this.orderService.findOrderByReferenceCode(referenceCode);
+    const order =  await this.orderService.findOrderByReferenceCode(referenceCode);
+    if(!order){
+      throw new NotFoundException(`Order by the ID ${referenceCode} is not found.`)
+    }
+    return order;
+
   }
   async processOrderBooks(order:Order): Promise<void> {
     return await this.orderService.processOrderBooks(order);
@@ -120,7 +125,6 @@ export class PaymentService {
         }
         return transaction;
     } catch (error) {
-        console.error(`Error finding transaction by ID: ${error.message}`);
         throw new HttpException({
             status: HttpStatus.BAD_REQUEST,
             error: `Error finding transaction: ${error.message}`,
@@ -138,7 +142,6 @@ async getUserTransactions(userId: string): Promise<Transaction[]> {
   }
   return transactions;
 } catch (error) {
-  console.error(`Error finding transaction by ID: ${error.message}`);
   throw new HttpException({
       status: HttpStatus.BAD_REQUEST,
       error: `Error finding transaction: ${error.message}`,
@@ -157,7 +160,6 @@ async getUserTransactionById(userId: string, transactionId: string): Promise<Tra
   }
   return transaction;
 } catch (error) {
-  console.error(`Error finding transaction by ID: ${error.message}`);
   throw new HttpException({
       status: HttpStatus.BAD_REQUEST,
       error: `Error finding transaction: ${error.message}`,
