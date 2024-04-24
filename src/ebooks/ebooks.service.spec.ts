@@ -256,9 +256,30 @@ describe('EbooksService', () => {
     const res = await service.findByTitle("The title");
     expect(res).toBeNull();
   });
+
+  it('should assign an ebook to a reader if both exists', async () => {
+    ebooksReaderRepository.create = jest.fn().mockImplementation((data) => {return {readerId: data.userId, ebookId: data.ebookId}});
+    const assigned = await service.assignEbookToReader({userId: "20f68e83-ee89-4739-9682-c2c803748f36", ebookId: createdEbook.id});
+    expect(assigned).toBeDefined();
+    expect(assigned.ebookId).toBe(createdEbook.id);
+  });
+
+  it('should find all ebook of an existing reader', async () => {
+    ebooksReaderRepository.find = jest.fn().mockReturnValue(createdEbooksReaders); 
+    ebookRepository.findBy = jest.fn().mockReturnValue(createdEbooks); 
+    
+    const res = await service.findAllEbooksByReader("20f68e83-ee89-4739-9682-c2c803748f36");
+    expect(res).toBeDefined();
+    expect(res.length).toBe(5);
+  });
+
+  it('should return empty list if a reader has no ebooks', async () => {
+    ebooksReaderRepository.find = jest.fn().mockReturnValue([]); 
+    const res = await service.findAllEbooksByReader("20f68e83-ee89-4739-9682-c2c803748f36");
+    expect(res).toBeDefined();
+    expect(res.length).toBe(0);
+  });
 });
-
-
 
 const createdEbook = {
   id: "10f68e83-ee89-4739-9682-c2c803748f36",
@@ -330,3 +351,31 @@ const createdReader = {
   favoriteGenre: "Fiction",
   bookList: ""
 }
+
+const createdEbooksReaders = [
+  {
+    id: "20A68e83-ee89-4739-9682-c2c803748f36",
+    readerId: "20f68e83-ee89-4739-9682-c2c803748f36",
+    ebookId: createdEbooks[0].id
+  },
+  {
+    id: "20B68e83-ee89-4739-9682-c2c803748f36",
+    readerId: "20f68e83-ee89-4739-9682-c2c803748f36",
+    ebookId: createdEbooks[1].id
+  },
+  {
+    id: "20C68e83-ee89-4739-9682-c2c803748f36",
+    readerId: "20f68e83-ee89-4739-9682-c2c803748f36",
+    ebookId: createdEbooks[2].id
+  },
+  {
+    id: "20D68e83-ee89-4739-9682-c2c803748f36",
+    readerId: "20f68e83-ee89-4739-9682-c2c803748f36",
+    ebookId: createdEbooks[3].id
+  },
+  {
+    id: "20E68e83-ee89-4739-9682-c2c803748f36",
+    readerId: "20f68e83-ee89-4739-9682-c2c803748f36",
+    ebookId: createdEbooks[4].id
+  },
+]
