@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/auth.service';
 import { RolesGuard } from '../src/auth/guard/roles.guard';
+import { RoleEnum } from '../src/auth/enum/role.enum';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -27,19 +28,6 @@ describe('AppController (e2e)', () => {
       .expect('Hello World!');
   });
 });
-
-const mockAuthGuard = () => ({
-  canActivate: (context: ExecutionContext) => {
-    const req = context.switchToHttp().getRequest();
-    req.user = { id: '1', username: 'admin', role: ['Admin'] };
-    return true;
-  },
-});
-
-const mockRolesGuard = () => ({
-  canActivate: (context: ExecutionContext) => true,
-});
-
 
 describe('AuthController', () => {
   let app: INestApplication;
@@ -63,11 +51,11 @@ describe('AuthController', () => {
         },
         {
           provide: AuthGuard('jwt'),
-          useFactory: mockAuthGuard,
+          useValue: { canActivate: () => true },
         },
         {
           provide: RolesGuard,
-          useFactory: mockRolesGuard,
+          useValue: { canActivate: () => true },
         },
       ],
     }).compile();
@@ -110,11 +98,24 @@ describe('AuthController', () => {
   it('should get all users for admin', async () => {
     const users = [{ username: 'user1' }, { username: 'user2' }];
     authService.getAllUsers = jest.fn().mockResolvedValue(users);
-  
+
+    const jwt = require('jsonwebtoken');
+
+    const token = jwt.sign(
+      {
+        sub: '4908705d-b880-467d-9ad6-f81b0138d8ba',
+        username: 'admin',
+        role: RoleEnum.ADMIN
+      },
+      'clave_secreta',
+      { expiresIn: '1h' }
+    );
+    
     await request(app.getHttpServer())
       .get('/auth/')
+      .set('Authorization', `Bearer ${token}`)
       .expect(200)
-      .expect(users);
+      .expect(users); 
   });
   
   it('should update a user', async () => {
@@ -123,13 +124,25 @@ describe('AuthController', () => {
   
     authService.getUserById = jest.fn().mockResolvedValue(updatedUser);
     authService.update= jest.fn().mockResolvedValue(updatedUser);
+
+    const jwt = require('jsonwebtoken');
+
+    const token = jwt.sign(
+      {
+        sub: '4908705d-b880-467d-9ad6-f81b0138d8ba',
+        username: 'admin',
+        role: RoleEnum.ADMIN
+      },
+      'clave_secreta',
+      { expiresIn: '1h' }
+    );
   
     await request(app.getHttpServer())
       .patch('/auth/1')
+      .set('Authorization', `Bearer ${token}`)
       .send(updateUserDto)
       .expect(200)
       .expect(updatedUser);
   });
-  
   
 });
