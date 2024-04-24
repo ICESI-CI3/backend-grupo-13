@@ -135,6 +135,33 @@ describe('OrderService', () => {
       await expect(service.createOrder(userId, { ebookIds: ['ebook-id-in-order'] }))
         .rejects.toThrow(HttpException);
     });
+
+    it('should throw an error if no user is found', async () => {
+      const userId = 'non-existing-user-id';
+      (authService.getUserById as jest.Mock).mockResolvedValue(null);
+  
+      await expect(service.createOrder(userId, { ebookIds: [] }))
+        .rejects.toThrow(HttpException);
+    });
+  
+    it('should throw an error if the user already owns all requested ebooks', async () => {
+      const userId = 'existing-user-id';
+      (authService.getUserById as jest.Mock).mockResolvedValue({ id: userId, email: 'user@example.com' });
+      (ebooksService.findAllEbooksByReader as jest.Mock).mockResolvedValue(['ebook-id-1', 'ebook-id-2']);
+  
+      await expect(service.createOrder(userId, { ebookIds: ['ebook-id-1', 'ebook-id-2'] }))
+        .rejects.toThrow(HttpException); 
+    });
+  
+    it('should throw an error if requested ebooks are not available', async () => {
+      const userId = 'existing-user-id';
+      (authService.getUserById as jest.Mock).mockResolvedValue({ id: userId, email: 'user@example.com' });
+      (ebooksService.findAllEbooksByReader as jest.Mock).mockResolvedValue([]);
+      (ebooksService.findBy as jest.Mock).mockResolvedValue([]); 
+  
+      await expect(service.createOrder(userId, { ebookIds: ['unavailable-ebook-id'] }))
+        .rejects.toThrow(HttpException); 
+    });
   });
   describe('calculateTotalAmount', () => {
     it('should return the total amount of all ebooks', () => {
@@ -341,6 +368,93 @@ describe('OrderService', () => {
     });
   });
   
+  describe('findOrderByReferenceCode', () => {
+    it('should return an order when a valid reference code is provided', async () => {
+      const referenceCode = 'b5ab68f0-6d20-48db-9bac-e069e45ed4f1';
+      const mockOrder = { referenceCode };
+
+      (orderRepository.findOne as jest.Mock).mockResolvedValue(mockOrder);
+
+      const order = await service.findOrderByReferenceCode(referenceCode);
+
+      expect(orderRepository.findOne).toHaveBeenCalledWith({
+        where: { referenceCode: referenceCode },
+        relations: ['ebooks', 'user'],
+      });
+      expect(order).toEqual(mockOrder);
+    });
+
+    it('should return null when an order is not found', async () => {
+      const referenceCode = 'invalid-reference-code';
+
+      (orderRepository.findOne as jest.Mock).mockResolvedValue(null);
+
+      const order = await service.findOrderByReferenceCode(referenceCode);
+
+      expect(order).toBeNull();
+    });
+  });
+
+  describe('processOrderBooks', () => {
+    it('should add ebooks to reader when processing an order', async () => {
+      const ebook1 = new Ebook();
+      ebook1.title = "Title of Ebook 1";
+      ebook1.price = 10000;
+
+      const ebook2 = new Ebook();
+      ebook2.title = "Title of Ebook 2";
+      ebook2.price = 20000;
+      
+      const ebooks : Ebook[] = [ebook1,ebook2];
+      const mockOrder = {
+        user: { id: 'b5ab68f0-6d20-48db-9bac-e069e45ed4f1' },
+        ebooks: ebooks,
+      };
+      (ebooksService.addEbooksToReader as jest.Mock).mockResolvedValue(undefined);
+      
+
+      await (service.processOrderBooks as jest.Mock)(mockOrder);
+
+      expect(ebooksService.addEbooksToReader).toHaveBeenCalledWith(mockOrder.user.id, mockOrder.ebooks);
+    });
+    describe('generatePaymentLink', () => {
+      it('should generate a payment link for an order', async () => {
+        const mockOrder = {
+          referenceCode: 'b5ab68f0-6d20-48db-9bac-e069e45ed4f1',
+          amount: 1000,
+          user: { email: 'user@example.com' },
+        };
+        const paymentLink = 'http://payment.link';
+        
+       
+        (paymentService.generatePaymentLink as jest.Mock).mockResolvedValue(paymentLink);
   
+        const link = await (service.generatePaymentLink as jest.Mock)(mockOrder);
+  
+        expect(paymentService.generatePaymentLink).toHaveBeenCalledWith(expect.objectContaining({
+          referenceCode: mockOrder.referenceCode,
+          amount: mockOrder.amount,
+          buyerEmail: mockOrder.user.email,
+        }));
+        expect(link).toBe(paymentLink);
+      });
+      it('should handle failure to generate a payment link', async () => {
+        const mockOrder = {
+          referenceCode: 'order-ref-code',
+          amount: 100,
+          user: { email: 'user@example.com' },
+        };
+  
+        (paymentService.generatePaymentLink as jest.Mock).mockRejectedValue(new Error('Payment service unavailable'));
+  
+        await expect( (service.generatePaymentLink as jest.Mock)(mockOrder))
+          .rejects.toThrow('Payment service unavailable');
+  
+        // Verify that the mock was called
+        expect(paymentService.generatePaymentLink).toHaveBeenCalledWith(expect.anything());
+      });
+    });
+
+  });
 });
 
