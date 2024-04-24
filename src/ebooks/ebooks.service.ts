@@ -26,107 +26,107 @@ export class EbooksService {
 
   public async addToWishlist(dto: WishListDto): Promise<Wish> {
     try {
-        validateUuid(dto.reader);
-        validateUuid(dto.ebook);
-
-        const user = await this.authService.getUserById(dto.reader);
-        if (!user) {
-            throw new NotFoundException(`User not found.`);
-        }
-
-        const reader = await this.authService.getReaderByUser(user.id);
-        if (!reader) {
-            throw new NotFoundException(`Reader not found.`);
-        }
-
-        const ebook = await this.ebooksRepository.findOne({ where: { id: dto.ebook } });
-        if (!ebook) {
-            throw new NotFoundException(`Ebook not found.`);
-        }
-
-        const newWish = this.wishRepository.create({
-            reader,
-            ebook
-        });
-        await this.wishRepository.save(newWish);
-        return newWish;
-    } catch (error) {
-        console.error(`Error adding to wishlist: ${error.message}`);
-        throw new HttpException({
-            status: HttpStatus.BAD_REQUEST,
-            error: error.message,
-        }, HttpStatus.BAD_REQUEST);
-    }
-}
-public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
-  try {
       validateUuid(dto.reader);
       validateUuid(dto.ebook);
 
       const user = await this.authService.getUserById(dto.reader);
       if (!user) {
-          throw new NotFoundException(`User not found.`);
+        throw new NotFoundException(`User not found.`);
       }
 
       const reader = await this.authService.getReaderByUser(user.id);
       if (!reader) {
-          throw new NotFoundException(`Reader not found.`);
+        throw new NotFoundException(`Reader not found.`);
       }
 
       const ebook = await this.ebooksRepository.findOne({ where: { id: dto.ebook } });
       if (!ebook) {
-          throw new NotFoundException(`Ebook not found.`);
+        throw new NotFoundException(`Ebook not found.`);
+      }
+
+      const newWish = this.wishRepository.create({
+        reader,
+        ebook
+      });
+      await this.wishRepository.save(newWish);
+      return newWish;
+    } catch (error) {
+      console.error(`Error adding to wishlist: ${error.message}`);
+      throw new HttpException({
+        status: HttpStatus.BAD_REQUEST,
+        error: error.message,
+      }, HttpStatus.BAD_REQUEST);
+    }
+  }
+  public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
+    try {
+      validateUuid(dto.reader);
+      validateUuid(dto.ebook);
+
+      const user = await this.authService.getUserById(dto.reader);
+      if (!user) {
+        throw new NotFoundException(`User not found.`);
+      }
+
+      const reader = await this.authService.getReaderByUser(user.id);
+      if (!reader) {
+        throw new NotFoundException(`Reader not found.`);
+      }
+
+      const ebook = await this.ebooksRepository.findOne({ where: { id: dto.ebook } });
+      if (!ebook) {
+        throw new NotFoundException(`Ebook not found.`);
       }
 
       const result = await this.wishRepository.delete({ reader, ebook });
       if (result.affected === 0) {
-          throw new NotFoundException(`No changes`);
+        throw new NotFoundException(`No changes`);
       }
       return result;
-  } catch (error) {
-      console.error(`Error removing from wishlist: ${error.message}`); 
+    } catch (error) {
+      console.error(`Error removing from wishlist: ${error.message}`);
       throw new HttpException({
-          status: HttpStatus.BAD_REQUEST,
-          error: error.message,
+        status: HttpStatus.BAD_REQUEST,
+        error: error.message,
       }, HttpStatus.BAD_REQUEST);
+    }
   }
-}
 
   public async create(createEbookDto: CreateEbookDto): Promise<Ebook> {
     try {
-        validateUuid(createEbookDto.author);
+      validateUuid(createEbookDto.author);
 
-        const user = await this.authService.getUserById(createEbookDto.author);
-        
-        if (!user) {
-            console.error(`User with ID ${createEbookDto.author} not found.`);
-            return null; 
-        }
+      const user = await this.authService.getUserById(createEbookDto.author);
 
-        const author = await this.authService.getAuthorByUser(user.id);
-        
-        if (!author) {
-            console.error(`Author with ID ${createEbookDto.author} not found.`);
-            return null; 
-        }
+      if (!user) {
+        console.error(`User with ID ${createEbookDto.author} not found.`);
+        return null;
+      }
 
-        const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
-        const newEbook = this.ebooksRepository.create({
-            ...createEbookDto,
-            author: author,
-            fileData: binaryData,
-        });
+      const author = await this.authService.getAuthorByUser(user.id);
 
-        await this.ebooksRepository.save(newEbook);
-        return newEbook;
+      if (!author) {
+        console.error(`Author with ID ${createEbookDto.author} not found.`);
+        return null;
+      }
+
+      const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
+      const newEbook = this.ebooksRepository.create({
+        ...createEbookDto,
+        author: author,
+        fileData: binaryData,
+      });
+
+      await this.ebooksRepository.save(newEbook);
+      return newEbook;
     } catch (error) {
-        console.error(`Error creating eBook: ${error.message}`); 
-        throw new HttpException({
-          status: HttpStatus.BAD_REQUEST,
-          error: error.message,
+      console.error(`Error creating eBook: ${error.message}`);
+      throw new HttpException({
+        status: HttpStatus.BAD_REQUEST,
+        error: error.message,
       }, HttpStatus.BAD_REQUEST);
     }
-}
+  }
 
 
 
@@ -136,22 +136,22 @@ public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
 
   public async findById(id: string): Promise<Ebook> {
     try {
-        
-        validateUuid(id);
 
-        const ebook = await this.ebooksRepository.findOne({ where: { id } });
-        if (!ebook) {
-            throw new NotFoundException(`Ebook with ID ${id} not found.`);
-        }
-        return ebook;
+      validateUuid(id);
+
+      const ebook = await this.ebooksRepository.findOne({ where: { id } });
+      if (!ebook) {
+        throw new NotFoundException(`Ebook with ID ${id} not found.`);
+      }
+      return ebook;
     } catch (error) {
-        console.error(`Error finding eBook by ID: ${error.message}`);
-        throw new HttpException({
-            status: HttpStatus.BAD_REQUEST,
-            error: `Error finding eBook: ${error.message}`,
-        }, HttpStatus.BAD_REQUEST);
+      console.error(`Error finding eBook by ID: ${error.message}`);
+      throw new HttpException({
+        status: HttpStatus.BAD_REQUEST,
+        error: `Error finding eBook: ${error.message}`,
+      }, HttpStatus.BAD_REQUEST);
     }
-}
+  }
 
   public async filterBy(filter: { price: number[], author: string, }): Promise<Ebook[]> {
     const query = {};
@@ -198,11 +198,11 @@ public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
     return result;
   }
 
-  public async assignEbookToReader(createEbookReaderDto: CreateEbookReaderDto):Promise<EbooksReader> {
+  public async assignEbookToReader(createEbookReaderDto: CreateEbookReaderDto): Promise<EbooksReader> {
 
     const newEbook = this.ebookReaderRepository.create({
-      readerId:createEbookReaderDto.userId,
-      ebookId:createEbookReaderDto.ebookId
+      readerId: createEbookReaderDto.userId,
+      ebookId: createEbookReaderDto.ebookId
     });
 
     await this.ebookReaderRepository.save(newEbook);
@@ -210,7 +210,7 @@ public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
   }
 
   async findAllEbooksByReader(readerId: string): Promise<Ebook[]> {
-    
+
     const ebooksReader = await this.ebookReaderRepository.find({
       where: { readerId: readerId }
     });
@@ -237,12 +237,12 @@ public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
         const tem = new CreateEbookReaderDto();
         tem.ebookId = ebook.id;
         tem.userId = userId;
-        await this.assignEbookToReader(tem);  
-      } 
+        await this.assignEbookToReader(tem);
+      }
     }
   }
-  
-  
+
+
   async findBy(ids: string[]): Promise<Ebook[]> {
     return await this.ebooksRepository.find({
       where: { id: In(ids) }
