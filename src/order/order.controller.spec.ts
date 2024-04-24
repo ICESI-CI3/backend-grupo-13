@@ -1,32 +1,39 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
 
 describe('OrderController', () => {
-  let controller: OrderController;
-  let mockOrderService: Partial<OrderService>;
+  let app: INestApplication;
+  let orderService: Partial<OrderService>;
 
   beforeEach(async () => {
+    orderService = {
+      // Mock methods and their return values
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OrderController],
       providers: [
         {
           provide: OrderService,
-          useValue: {
-            createOrder: jest.fn(),
-            generatePaymentLink: jest.fn().mockResolvedValue('https://payment-link.com'),
-          },
+          useValue: orderService,
         },
       ],
     }).compile();
 
-    controller = module.get<OrderController>(OrderController);
-    mockOrderService = module.get<OrderService>(OrderService);
+    app = module.createNestApplication();
+    await app.init();
   });
 
-  it('should return a payment link', async () => {
-    const createOrderDto = { userId: 'uuid-user', ebookIds: ['uuid-book1', 'uuid-book2'] };
-    const response = await controller.create(createOrderDto);
-    expect(response).toEqual('https://payment-link.com');
+  it('/order/create (POST)', () => {
+    return request(app.getHttpServer())
+      .post('/order/create')
+      .send({ /* your DTO data */ })
+      .expect(201)
+      .expect(orderService.createOrder(/* expected result */));
   });
+
+  // Additional tests for other endpoints
 });
