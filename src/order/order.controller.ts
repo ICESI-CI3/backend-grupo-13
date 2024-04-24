@@ -2,10 +2,9 @@ import { Controller, Post, Body, UseGuards, Get, Req, Param, NotFoundException }
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { RoleEnum } from 'src/auth/enum/role.enum';
-import { Transaction } from 'src/payment/entities/transaction.entity';
-import { Roles } from 'src/auth/decorator/roles.decorator';
+import { RolesGuard } from '../auth/guard/roles.guard';
+import { RoleEnum } from '../auth/enum/role.enum';
+import { Roles } from '../auth/decorator/roles.decorator';
 import { Order } from './entities/order.entity';
 
 @Controller('/order')

@@ -8,7 +8,7 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
 import { OrderService } from '../order/order.service';
 import { Order } from '../order/entities/order.entity';
-import { validateUuid } from 'src/utils/validateUuid';
+import { validateUuid } from '../utils/validateUuid';
 
 
 @Injectable()
