@@ -96,6 +96,12 @@ export class EbooksService {
     try {
       validateUuid(createEbookDto.author);
 
+      const ebookExists = await this.findByTitle(createEbookDto.title);
+
+      if (ebookExists) {
+        throw new Error('Ebook already exists');
+      }
+
       const user = await this.authService.getUserById(createEbookDto.author);
 
       if (!user) {
@@ -129,7 +135,11 @@ export class EbooksService {
   }
 
   public async findAll(): Promise<Ebook[]> {
-    return this.ebooksRepository.find();
+    try {
+      return this.ebooksRepository.find();
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   public async findById(id: string): Promise<Ebook> {
@@ -189,6 +199,7 @@ export class EbooksService {
   }
 
   public async remove(id: string): Promise<DeleteResult> {
+    const ebook = await this.findById(id);
     const result = await this.ebooksRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Ebook with ID ${id} not found.`);
@@ -207,18 +218,27 @@ export class EbooksService {
   }
 
   async findAllEbooksByReader(readerId: string): Promise<Ebook[]> {
-
-    const ebooksReader = await this.ebookReaderRepository.find({
-      where: { readerId: readerId }
-    });
-
-    const ebookIds = ebooksReader.map(er => er.ebookId);
-
-    if (ebookIds.length > 0) {
-      return this.ebooksRepository.findBy({ id: In(ebookIds) });
+    try{
+      validateUuid(readerId);
+      const reader = this.ebookReaderRepository.findOne({where:{id:readerId}});
+      if(!reader){
+        throw new Error('User reader not exists');
+      }
+      const ebooksReader = await this.ebookReaderRepository.find({
+        where: { readerId: readerId }
+      });
+  
+      const ebookIds = ebooksReader.map(er => er.ebookId);
+  
+      if (ebookIds.length > 0) {
+        return this.ebooksRepository.findBy({ id: In(ebookIds) });
+      }
+  
+      return [];
+    }catch(error){
+      throw new NotFoundException(error.message);
     }
-
-    return [];
+  
   }
 
   async addEbooksToReader(userId: string, ebooks: Ebook[]): Promise<void> {

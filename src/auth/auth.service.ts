@@ -10,6 +10,7 @@ import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validateUuid } from '../utils/validateUuid';
+import { throwError } from 'rxjs';
 
 
 @Injectable()
@@ -43,25 +44,16 @@ export class AuthService {
   async createUser(createUserDto: CreateUserDto): Promise<{ access_token: string }> {
     try {
 
-      const { password, role, ...userData } = createUserDto;
+      const { password, email, role, ...userData } = createUserDto;
 
+      const existingUser = await this.userRepository.findOne({ where: { email } });
+      if (existingUser) {
+        throw new Error('Email already registered');
+      }
 
       const hashedPassword = bcrypt.hashSync(password, 10);
 
-      let rol;
-      switch (role) {
-        case 'Reader':
-          rol = RoleEnum.USER;
-          break;
-        case 'Author':
-          rol = RoleEnum.AUTHOR;
-          break;
-        case 'Admin':
-          rol = RoleEnum.ADMIN;
-          break;
-        default:
-          throw new Error('Not a valid role');
-      }
+      let rol = await this.getRole(role);
 
       if(rol==RoleEnum.USER){
         if(createUserDto.favoriteGenre == null || createUserDto.bookList == null){
@@ -122,6 +114,7 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
+
   public async getUserById(id: string): Promise<User | undefined> {
     try {
         validateUuid(id);
@@ -132,17 +125,27 @@ export class AuthService {
         }
         return user;
     } catch (error) {
-        console.error(`Error finding user by ID: ${error.message}`);
         throw new NotFoundException(`Error finding user: ${error.message}`);
     }
-}
+  }
 
   async getReaderByUser(userId: string) {
-    return this.readerRepository.findOne({ where: { userId } });
+    try{
+      validateUuid(userId);
+      return this.readerRepository.findOne({ where: { userId } });
+    }catch(error){
+      throw new NotFoundException(`Error finding user: ${error.message}`);
+    }
+    
   } 
 
   async getAuthorByUser(userId: string) {
-    return this.authorRepository.findOne({ where: { userId } });
+    try{
+      validateUuid(userId);
+      return this.authorRepository.findOne({ where: { userId } });
+    }catch(error){
+      throw new NotFoundException(`Error finding user: ${error.message}`);
+    }
   } 
 
   async getAllUsers(): Promise<User[]> {
@@ -150,19 +153,14 @@ export class AuthService {
   }
 
   async getUserByIdAndRole(id: string, roleName: string): Promise<User | undefined> {
-    let rol;
-    switch (roleName) {
-      case 'Reader':
-        rol = RoleEnum.USER
-        break;
-      case 'Author':
-        rol = RoleEnum.AUTHOR
-        break;
-      case 'Admin':
-        rol = RoleEnum.ADMIN
-      break;
+    try{
+      validateUuid(id);
+      let rol = await this.getRole(roleName);
+      return this.userRepository.findOne({ where: { id, role: rol } });
+    } catch(error){
+      throw new NotFoundException(`Error finding user: ${error.message}`);
     }
-    return this.userRepository.findOne({ where: { id, role: rol } });
+
   }
 
   public async findByUsername(username: string): Promise<User>{
@@ -176,7 +174,6 @@ export class AuthService {
 
   public async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      validateUuid(id);
       const user = await this.getUserById(id); 
       const updatedUser = Object.assign(user, updateUserDto);
       await this.userRepository.save(updatedUser);
@@ -188,7 +185,7 @@ export class AuthService {
 
   public async remove(id: string): Promise<DeleteResult> {
     try {
-      validateUuid(id);
+      const user = await this.getUserById(id); 
       const result = await this.userRepository.delete(id);
       if (result.affected === 0) {
         throw new NotFoundException(`User with ID ${id} not found.`);
@@ -196,6 +193,19 @@ export class AuthService {
       return result;
     } catch (error) {
         throw new NotFoundException(`Error finding user: ${error.message}`);
+    }
+  }
+
+  public async getRole(roleName:string):Promise<RoleEnum>{
+    switch (roleName) {
+      case 'Reader':
+        return RoleEnum.USER
+      case 'Author':
+        return RoleEnum.AUTHOR
+      case 'Admin':
+        return RoleEnum.ADMIN
+      default:
+          throw new Error('Not a valid role');
     }
   }
 }

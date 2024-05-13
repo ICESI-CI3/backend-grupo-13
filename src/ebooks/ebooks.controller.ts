@@ -20,34 +20,19 @@ export class EbooksController {
   @Roles(RoleEnum.AUTHOR)
   @Post()
   public async create(@Body() createEbookDto: CreateEbookDto): Promise<Ebook> {
-    const ebookExists = await this.ebooksService.findByTitle(createEbookDto.title);
-
-    if (ebookExists) {
-      throw new HttpException('Ebook already exists', HttpStatus.BAD_REQUEST);
-    }
-
-    const ebook = await this.ebooksService.create(createEbookDto);
-    return ebook;
+    return await this.ebooksService.create(createEbookDto);
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Get()
   public async findAll(): Promise<Ebook[]> {
-    try {
-      const ebooks = this.ebooksService.findAll();
-      return ebooks;
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return this.ebooksService.findAll();
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Get('info/:id')
   public async findById(@Param('id') id: string): Promise<InfoEbookDto> {
     const ebook = await this.ebooksService.findById(id);
-    if (!ebook) {
-      throw new NotFoundException({ message: "Ebook not found" });
-    }
     return new InfoEbookDto(ebook.title, ebook.publisher, ebook.author.penName, ebook.overview, ebook.price, ebook.stock);
   }
 
@@ -55,29 +40,18 @@ export class EbooksController {
   @Get('visualize/:id')
   public async visualizeById(@Param('id') id: string): Promise<VisualizeEbookDto> {
     const ebook = await this.ebooksService.findById(id);
-    if (!ebook) {
-      throw new NotFoundException({ message: "Ebook not found" });
-    }
     return new VisualizeEbookDto(ebook.title, Buffer.from(ebook.fileData).toString("base64"));
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
   @Patch('visualize/:id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateEbookDto): Promise<Ebook> {
-    const ebook = await this.ebooksService.findById(id);
-    if (!ebook) {
-      throw new NotFoundException({ message: "Ebook not found" });
-    }
     return this.ebooksService.update(id, updateUserDto);
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
   @Delete(':id')
   public async remove(@Param('id') id: string): Promise<DeleteResult> {
-    const ebook = await this.ebooksService.findById(id);
-    if (!ebook) {
-      throw new NotFoundException({ message: "Ebook not found" });
-    }
     return this.ebooksService.remove(id);
   }
 

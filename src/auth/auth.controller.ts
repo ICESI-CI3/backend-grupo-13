@@ -54,10 +54,6 @@ export class AuthController {
   @Roles(RoleEnum.ADMIN)
   @Patch('/:id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.authService.getUserById(id);
-    if (!user) {
-      throw new NotFoundException({ message: "User not found" });
-    }
     return this.authService.update(id, updateUserDto);
   }
 
@@ -65,10 +61,6 @@ export class AuthController {
   @Roles(RoleEnum.ADMIN)
   @Delete('/:id')
   public async remove(@Param('id') id: string): Promise<DeleteResult> {
-    const user = await this.authService.getUserById(id);
-    if (!user) {
-      throw new NotFoundException({ message: "User not found" });
-    }
     return this.authService.remove(id);
   }
 
