@@ -15,57 +15,42 @@ export class OrderController {
   @Post('create')
   async create(@Req() req,@Body() createOrderDto: CreateOrderDto) {
     const order = this.orderService.createOrder(req.user.userId,createOrderDto);
-    return this.orderService.generatePaymentLink(await order);
+    return await this.orderService.generatePaymentLink(await order);
   }
   
   @UseGuards(AuthGuard('jwt'),RolesGuard)
-   @Get('/:orderId')
-   async getUserOrderById(@Req() req,@Param('orderId') orderId: string): Promise<Order> {
-    const order = await this.orderService.getUserOrderById(req.user.userId, orderId);
-    if (!order) {
-      throw new NotFoundException(`Order with ID ${orderId} not found.`);
-    }
-    return order;
-   }
- 
-   @UseGuards(AuthGuard('jwt'),RolesGuard)
-   @Get('/')
-   async getUserOrders(@Req() req): Promise<Order[]> {
-        const order = await this.orderService.getUserOrders(req.user.userId);
-      if (!order) {
-        throw new NotFoundException(`Not Found orders by user ${req.user.userId}`);
-      }
-      return order;
-
-   }
-
-   @UseGuards(AuthGuard('jwt'),RolesGuard)
-   @Roles(RoleEnum.ADMIN)
-   @Get('/:userId/:orderId')  
-  async getOfUserOrderById(@Param('orderId') orderId: string,@Param('userId') userId: string): Promise<Order> {
-    const order =  this.orderService.getUserOrderById(userId,orderId);
-    if (!order) {
-      throw new NotFoundException(`Not Found orders by user ${userId}`);
-    }
-    return order;
+  @Get('/:orderId')
+  async getUserOrderById(@Req() req,@Param('orderId') orderId: string): Promise<Order> {
+    return await this.orderService.getUserOrderById(req.user.userId, orderId);
   }
+ 
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Get('/')
+  async getUserOrders(@Req() req): Promise<Order[]> {
+    return await this.orderService.getUserOrders(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @Get('/:userId/:orderId')  
+  async getOfUserOrderById(@Param('orderId') orderId: string,@Param('userId') userId: string): Promise<Order> {
+    return await this.orderService.getUserOrderById(userId,orderId);
+  }
+
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/all')  
- async getAllOrders(): Promise<Order[]> {
-     return await this.orderService.getAllOrders();
- }
+  async getAllOrders(): Promise<Order[]> {
+    return await this.orderService.getAllOrders();
+  }
 
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/:id')
   async getOrderById(@Param('id') id: string): Promise<Order> {
-      const order = await this.orderService.getOrderById(id); 
-      if (!order) {
-        throw new NotFoundException(`Not Found orders by user ${id}`);
-      }
-      return order;
+    return await this.orderService.getOrderById(id); 
   }
+  
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post('create/:id')

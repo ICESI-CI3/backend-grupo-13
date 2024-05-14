@@ -121,7 +121,7 @@ export class AuthService {
 
         const user = await this.userRepository.findOne({ where: { id } });
         if (!user) {
-            console.error(`User with ID ${id} not found.`);
+            throw new Error(`User with ID ${id} not found.`);
         }
         return user;
     } catch (error) {
