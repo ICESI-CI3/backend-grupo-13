@@ -18,61 +18,27 @@ export class PaymentController {
    @UseGuards(AuthGuard('jwt'),RolesGuard)
    @Get('/transactions/:transactionsId')
    async getUserTransactionById(@Req() req,@Param('transactionsId') transactionsId: string): Promise<Transaction> {
-       return this.paymentService.getUserTransactionById(req.user.userId,transactionsId);
+       return await this.paymentService.getUserTransactionById(req.user.userId,transactionsId);
    }
  
    @UseGuards(AuthGuard('jwt'),RolesGuard)
    @Get('/transactions')
    async getUserTransactions(@Req() req): Promise<Transaction[]> {
-       return this.paymentService.getUserTransactions(req.user.userId);
+       return await this.paymentService.getUserTransactions(req.user.userId);
    }
 
   //Funciona para cuando el usuario le da el boton de mirar volver a pagina despues de que se acaba la transaccion en payu
   @Get('payu-response')
   async handleResponse(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
-    console.log("Response")
-    try {
-      if (transactionData.message === 'APPROVED') {
-        const order = await this.paymentService.findOrderByReferenceCode(transactionData.referenceCode);
-        transactionData.user = order.user
-        const transaction = await this.paymentService.createTransaction(transactionData);
-        
-      if (!order) {
-        throw new Error('Order not found');
-      }
-      
-      await this.paymentService.processOrderBooks(order);
-      
-      return  res.json(transaction);
-    }
-    return  res.json({message: 'Transaccion no aprovada'});
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to process transaction', details: error.message });
-    }
+    return await this.paymentService.handleResponse(transactionData,res);
   }
+
   //Funciona cuando el servidor de payu asincronicamente le informa al servidor de la confirmacion de la transaccion
   @Get('payu-confirmation')
   async handleConfirmation(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
-    console.log("confirmation")
-    try {
-      if (transactionData.message === 'APPROVED') {
-        const transaction = await this.paymentService.createTransaction(transactionData);
-        const order = await this.paymentService.findOrderByReferenceCode(transactionData.referenceCode);
-        
-
-      if (!order) {
-        throw new Error('Order not found');
-      }
-      
-      await this.paymentService.processOrderBooks(order);
-      
-      return  res.json(transaction);
-    }
-    return  res.json({message: 'Transaccion no aprovada'});
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to process transaction', details: error.message });
-    }
+    return await this.paymentService.handleConfirmation(transactionData,res);
   }
+  
   @UseGuards(AuthGuard('jwt'),RolesGuard)
    @Roles(RoleEnum.ADMIN)
    @Get()  

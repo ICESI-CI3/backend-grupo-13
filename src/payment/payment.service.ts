@@ -9,6 +9,7 @@ import { CreateTransactionFormDto } from './dto/create-transaction-form.dto';
 import { OrderService } from '../order/order.service';
 import { Order } from '../order/entities/order.entity';
 import { validateUuid } from '../utils/validateUuid';
+import { Response } from 'express';
 
 
 @Injectable()
@@ -131,41 +132,79 @@ export class PaymentService {
         }, HttpStatus.BAD_REQUEST);
     }
     
-}
-async getUserTransactions(userId: string): Promise<Transaction[]> {
-  try {
-    validateUuid(userId);
-  const transactions = await this.transactionRepository.find({where: {user: { id: userId }}
-  });
-  if (!transactions) {
-      throw new NotFoundException(`Transactions for user ID ${userId} not found.`);
   }
-  return transactions;
-} catch (error) {
-  throw new HttpException({
-      status: HttpStatus.BAD_REQUEST,
-      error: `Error finding transaction: ${error.message}`,
-  }, HttpStatus.BAD_REQUEST);
-}
-}
+  async getUserTransactions(userId: string): Promise<Transaction[]> {
+    try {
+      validateUuid(userId);
+      const transactions = await this.transactionRepository.find({where: {user: { id: userId }}
+      });
+      if (!transactions) {
+          throw new NotFoundException(`Transactions for user ID ${userId} not found.`);
+      }
+      return transactions;
+    } catch (error) {
+      throw new HttpException({
+          status: HttpStatus.BAD_REQUEST,
+          error: `Error finding transaction: ${error.message}`,
+      }, HttpStatus.BAD_REQUEST);
+    }
+  }
 
 
-async getUserTransactionById(userId: string, transactionId: string): Promise<Transaction> {
-  try {
-    validateUuid(userId);
-    validateUuid(transactionId);
-  const transaction = await this.transactionRepository.findOne({where: { id: transactionId, user: { id: userId } },});
-  if (!transaction) {
-      throw new NotFoundException(`Transaction with ID ${transactionId} for user ID ${userId} not found.`);
+  async getUserTransactionById(userId: string, transactionId: string): Promise<Transaction> {
+    try {
+      validateUuid(userId);
+      validateUuid(transactionId);
+      const transaction = await this.transactionRepository.findOne({where: { id: transactionId, user: { id: userId } },});
+      if (!transaction) {
+        throw new NotFoundException(`Transaction with ID ${transactionId} for user ID ${userId} not found.`);
+      }
+      return transaction;
+    } catch (error) {
+      throw new HttpException({
+          status: HttpStatus.BAD_REQUEST,
+          error: `Error finding transaction: ${error.message}`,
+      }, HttpStatus.BAD_REQUEST);
+    }
   }
-  return transaction;
-} catch (error) {
-  throw new HttpException({
-      status: HttpStatus.BAD_REQUEST,
-      error: `Error finding transaction: ${error.message}`,
-  }, HttpStatus.BAD_REQUEST);
-}
-}
-  
-  
+
+  async handleResponse(transactionData: CreateTransactionDto, res: Response){
+    console.log("Response")
+    try {
+      if (transactionData.message === 'APPROVED') {
+        const order = await this.findOrderByReferenceCode(transactionData.referenceCode);
+        transactionData.user = order.user
+        const transaction = await this.createTransaction(transactionData);
+        
+        if (!order) {
+          throw new Error('Order not found');
+        }
+        await this.processOrderBooks(order);
+        return  res.json(transaction);
+      }
+      return  res.json({message: 'Transaccion no aprobada'});
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process transaction', details: error.message });
+    }
+  }
+
+  async handleConfirmation(transactionData: CreateTransactionDto, res: Response) {
+    console.log("confirmation")
+    try {
+      if (transactionData.message === 'APPROVED') {
+        const transaction = await this.createTransaction(transactionData);
+        const order = await this.findOrderByReferenceCode(transactionData.referenceCode);
+
+        if (!order) {
+          throw new Error('Order not found');
+        }
+        await this.processOrderBooks(order);
+        return  res.json(transaction);
+      }
+      return  res.json({message: 'Transaccion no aprovada'});
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process transaction', details: error.message });
+    }
+  }
+    
 }
