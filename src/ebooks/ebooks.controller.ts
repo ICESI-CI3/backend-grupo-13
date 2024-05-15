@@ -11,11 +11,19 @@ import { RoleEnum } from '../auth/enum/role.enum';
 import { VisualizeEbookDto } from './dto/visualize-ebook.dto';
 import { InfoEbookDto } from './dto/info-ebook.dto';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
+import { VoteDto } from './dto/create-vote.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('ebooks')
 export class EbooksController {
   constructor(private readonly ebooksService: EbooksService) { }
+
+  @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
+  @Post(':ebookId/vote')
+  async addVote(@Param('ebookId') ebookId: string, @Body() voteDto: VoteDto, @Req() req) {
+    const userId = req.user.id; 
+    return this.ebooksService.addVote(userId, ebookId, voteDto.value);
+  }
 
   @Roles(RoleEnum.AUTHOR)
   @Post()
@@ -68,5 +76,7 @@ export class EbooksController {
     const limitNumber = parseInt(limit, 10) || 10;
     return this.ebooksService.findAllEbooksByReader(readerId, pageNumber, limitNumber);
   }
+
+
 
 }

@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { RoleEnum } from "../enum/role.enum";
 import { Order } from "../../order/entities/order.entity";
+import { Vote } from "src/ebooks/entities/vote.entity";
 
 @Entity()
 export abstract class User {
@@ -19,7 +20,11 @@ export abstract class User {
   @Column({ type: 'enum', default: RoleEnum.USER, enum: RoleEnum })
   role: RoleEnum;
 
+  @OneToMany(() => Order, order => order.user)
   orders: Order[];
+
+  @OneToMany(() => Vote, vote => vote.user)
+  votes: Vote[];
 }
 
 @Entity()

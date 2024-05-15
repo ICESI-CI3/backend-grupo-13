@@ -1,5 +1,6 @@
 import { Author } from '../../auth/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { Vote } from './vote.entity';
 
 @Entity()
 export class Ebook {
@@ -37,6 +38,9 @@ export class Ebook {
 
   @Column('float')
   rating: number;
+
+  @OneToMany(() => Vote, vote => vote.ebook)
+  votes: Vote[];
 }
 
 @Entity()

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DeleteResult, In, Repository } from 'typeorm';
 import { Ebook, EbooksReader } from './entities/ebook.entity';
@@ -9,6 +9,7 @@ import { WishListDto } from './dto/wishlist';
 import { AuthService } from '../auth/auth.service';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 import { validateUuid } from '../utils/validateUuid';
+import { Vote } from './entities/vote.entity';
 
 @Injectable()
 export class EbooksService {
@@ -21,7 +22,9 @@ export class EbooksService {
     private readonly ebookReaderRepository: Repository<EbooksReader>,
     @InjectRepository(EbooksReader)
     private ebooksReaderRepository: Repository<EbooksReader>,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    @InjectRepository(Vote)
+    private readonly votesRepository: Repository<Vote>,
   ) { }
 
   public async addToWishlist(dto: WishListDto): Promise<Wish> {
@@ -268,4 +271,41 @@ export class EbooksService {
       where: { id: In(ids) }
     });
   }
+
+  async addVote(userId: string, ebookId: string, value: number): Promise<Ebook> {
+
+    const user = await this.authService.findByUsername(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const ebook = await this.ebooksRepository.findOne({ where: { id: ebookId }, relations: ['votes'] });
+    if (!ebook) {
+      throw new NotFoundException('Ebook not found');
+    }
+
+    const ownership = await this.ebookReaderRepository.findOne({ where: { readerId:  userId, ebookId: ebookId } });
+    if (!ownership) {
+      throw new ForbiddenException('You do not own this ebook');
+    }
+    
+
+    let vote = await this.votesRepository.findOne({ where: { user: { id: userId }, ebook: { id: ebookId } } });
+    if (vote) {
+      vote.value = value; 
+    } else {
+      vote = this.votesRepository.create({ value, ebook, user });
+    }
+    await this.votesRepository.save(vote);
+
+    ebook.rating = this.calculateRating(await this.votesRepository.find({ where: { ebook: { id: ebookId } } }));;
+    
+    return await this.ebooksRepository.save(ebook);
+  }
+
+  private calculateRating(votes: Vote[]): number {
+    const total = votes.reduce((acc, vote) => acc + vote.value, 0);
+    return total / votes.length;
+  }
+  
 }
