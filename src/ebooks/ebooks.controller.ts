@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, UseGuards, HttpException, HttpStatus, NotFoundException, Post } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards, HttpException, HttpStatus, NotFoundException, Post, Query, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { DeleteResult } from 'typeorm';
 import { EbooksService } from './ebooks.service';
@@ -19,14 +19,16 @@ export class EbooksController {
 
   @Roles(RoleEnum.AUTHOR)
   @Post()
-  public async create(@Body() createEbookDto: CreateEbookDto): Promise<Ebook> {
-    return await this.ebooksService.create(createEbookDto);
+  public async create(@Body() createEbookDto: CreateEbookDto,@Req() req): Promise<Ebook> {
+    return await this.ebooksService.create(createEbookDto,req.user.userId);
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Get()
-  public async findAll(): Promise<Ebook[]> {
-    return this.ebooksService.findAll();
+  public async findAll(@Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.ebooksService.findAll(pageNumber, limitNumber);
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
@@ -61,8 +63,10 @@ export class EbooksController {
   }
 
   @Get('/:readerId')
-  getBooksByReader(@Param('readerId') readerId: string): Promise<Ebook[]> {
-    return this.ebooksService.findAllEbooksByReader(readerId);
+  getBooksByReader(@Param('readerId') readerId: string,@Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.ebooksService.findAllEbooksByReader(readerId, pageNumber, limitNumber);
   }
 
 }

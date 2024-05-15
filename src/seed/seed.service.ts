@@ -61,7 +61,7 @@ export class SeederService {
         overview: 'Overview of Ebook1',
         price: 20000,
         stock: 100,
-        fileData: []
+        fileData: ""
       });
 
       // Insertar orden

@@ -92,9 +92,9 @@ export class EbooksService {
     }
   }
 
-  public async create(createEbookDto: CreateEbookDto): Promise<Ebook> {
+  public async create(createEbookDto: CreateEbookDto, userId: string): Promise<Ebook> {
     try {
-      validateUuid(createEbookDto.author);
+      validateUuid(userId);
 
       const ebookExists = await this.findByTitle(createEbookDto.title);
 
@@ -102,25 +102,23 @@ export class EbooksService {
         throw new Error('Ebook already exists');
       }
 
-      const user = await this.authService.getUserById(createEbookDto.author);
+      const user = await this.authService.getUserById(userId);
 
       if (!user) {
-        console.error(`User with ID ${createEbookDto.author} not found.`);
+        console.error(`User with ID ${userId} not found.`);
         return null;
       }
 
       const author = await this.authService.getAuthorByUser(user.id);
 
       if (!author) {
-        console.error(`Author with ID ${createEbookDto.author} not found.`);
+        console.error(`Author with ID ${userId} not found.`);
         return null;
       }
 
-      const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
       const newEbook = this.ebooksRepository.create({
         ...createEbookDto,
         author: author,
-        fileData: binaryData,
       });
 
       await this.ebooksRepository.save(newEbook);
@@ -134,9 +132,12 @@ export class EbooksService {
     }
   }
 
-  public async findAll(): Promise<Ebook[]> {
+  public async findAll(page: number = 1, limit: number = 10): Promise<Ebook[]> {
     try {
-      return this.ebooksRepository.find();
+      return await this.ebooksRepository.find({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -217,28 +218,31 @@ export class EbooksService {
     return newEbook;
   }
 
-  async findAllEbooksByReader(readerId: string): Promise<Ebook[]> {
-    try{
+  async findAllEbooksByReader(readerId: string, page: number = 1, limit: number = 10): Promise<Ebook[]> {
+    try {
       validateUuid(readerId);
-      const reader = this.ebookReaderRepository.findOne({where:{id:readerId}});
-      if(!reader){
-        throw new Error('User reader not exists');
+      const reader = await this.ebookReaderRepository.findOne({ where: { id: readerId } });
+      if (!reader) {
+        throw new NotFoundException('User reader does not exist');
       }
       const ebooksReader = await this.ebookReaderRepository.find({
         where: { readerId: readerId }
       });
-  
+
       const ebookIds = ebooksReader.map(er => er.ebookId);
-  
+
       if (ebookIds.length > 0) {
-        return this.ebooksRepository.findBy({ id: In(ebookIds) });
+        return this.ebooksRepository.find({
+          where: { id: In(ebookIds) },
+          skip: (page - 1) * limit,
+          take: limit,
+        });
       }
-  
+
       return [];
-    }catch(error){
-      throw new NotFoundException(error.message);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-  
   }
 
   async addEbooksToReader(userId: string, ebooks: Ebook[]): Promise<void> {

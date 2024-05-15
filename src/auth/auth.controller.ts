@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Req, Param, HttpException, Delete, HttpStatus, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, Param, Delete, Patch, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -22,6 +22,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto): Promise<{ access_token: string }> {
+    console.log(createUserDto)
     return this.authService.createUser(createUserDto);
   }
 
@@ -46,8 +47,10 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/')
-  async getAllUsers(): Promise<User[]> {
-      return this.authService.getAllUsers();
+  async getAllUsers(@Query('page') page: string,@Query('limit') limit: string, ): Promise<User[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.authService.getAllUsers(pageNumber, limitNumber);  
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)

@@ -7,7 +7,7 @@ export class Ebook {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   title: string;
 
   @Column()
@@ -26,10 +26,17 @@ export class Ebook {
   @Column()
   stock: number;
 
-  @Column({
-    type: 'bytea',
-  })
-  fileData: Uint8Array;
+  @Column()
+  fileData: string;
+
+  @Column({ unique: true })
+  isbn: string;
+
+  @Column()
+  version: string;
+
+  @Column('float')
+  rating: number;
 }
 
 @Entity()

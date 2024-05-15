@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Req, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Req, Param, NotFoundException, Query } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -40,9 +40,11 @@ export class OrderController {
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/all')  
-  async getAllOrders(): Promise<Order[]> {
-    return await this.orderService.getAllOrders();
-  }
+  async getAllOrders( @Query('page') page: string,  @Query('limit') limit: string,): Promise<Order[]> {
+  const pageNumber = parseInt(page, 10) || 1;
+  const limitNumber = parseInt(limit, 10) || 10;
+  return this.orderService.getAllOrders(pageNumber, limitNumber);
+}
 
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)

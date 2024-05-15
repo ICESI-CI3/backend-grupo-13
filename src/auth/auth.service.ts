@@ -10,7 +10,6 @@ import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validateUuid } from '../utils/validateUuid';
-import { throwError } from 'rxjs';
 
 
 @Injectable()
@@ -43,7 +42,7 @@ export class AuthService {
   }
   async createUser(createUserDto: CreateUserDto): Promise<{ access_token: string }> {
     try {
-
+      console.log("opo")
       const { password, email, role, ...userData } = createUserDto;
 
       const existingUser = await this.userRepository.findOne({ where: { email } });
@@ -55,6 +54,8 @@ export class AuthService {
 
       let rol = await this.getRole(role);
 
+      console.log("aaaa")
+
       if(rol==RoleEnum.USER){
         if(createUserDto.favoriteGenre == null || createUserDto.bookList == null){
           throw new Error('Missing attributes for a reader');
@@ -65,20 +66,22 @@ export class AuthService {
         }
       }
 
+
       const user = await this.userRepository.create({
-        ...userData,
+        ...userData, 
         password: hashedPassword,
+        email: email,
         role: rol
       });
       const savedUser = await this.userRepository.save(user);
 
-      console.log("Role: ", role, " ID Usuario: ", savedUser.id)
       await this.addRoleSpecific(role, savedUser.id, createUserDto);
 
       const payload = { username: savedUser.username, sub: savedUser.id, role: savedUser.role };
       return {
         access_token: this.jwtService.sign(payload),
       };
+      
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -87,7 +90,6 @@ export class AuthService {
   private async addRoleSpecific(roleName: string, userId: string, createUserDto: CreateUserDto) {
     switch (roleName) {
       case 'Reader':
-        console.log("Creando lector");
         const reader = this.readerRepository.create({
           userId: userId,
           favoriteGenre: createUserDto.favoriteGenre,
@@ -96,7 +98,6 @@ export class AuthService {
         await this.readerRepository.save(reader);
         break;
       case 'Author':
-        console.log("Creando autor");
         const author = this.authorRepository.create({
           userId: userId,
           penName: createUserDto.penName,
@@ -148,8 +149,8 @@ export class AuthService {
     }
   } 
 
-  async getAllUsers(): Promise<User[]> {
-    return this.userRepository.find();
+  async getAllUsers(page: number = 1, limit: number = 10): Promise<User[]> {
+    return this.userRepository.find({skip: (page - 1) * limit, take: limit,});
   }
 
   async getUserByIdAndRole(id: string, roleName: string): Promise<User | undefined> {

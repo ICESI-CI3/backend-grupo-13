@@ -112,8 +112,11 @@ export class PaymentService {
     return await this.orderService.processOrderBooks(order);
   }
 
-  async getAllTransactions(): Promise<Transaction[]> {
-    return this.transactionRepository.find();
+  async getAllTransactions(page: number = 1, limit: number = 10): Promise<Transaction[]> {
+    return this.transactionRepository.find({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   async getTransactionById(id: string): Promise<Transaction> {
@@ -133,23 +136,25 @@ export class PaymentService {
     }
     
   }
-  async getUserTransactions(userId: string): Promise<Transaction[]> {
+  async getUserTransactions(userId: string, page: number = 1, limit: number = 10): Promise<Transaction[]> {
     try {
       validateUuid(userId);
-      const transactions = await this.transactionRepository.find({where: {user: { id: userId }}
+      const transactions = await this.transactionRepository.find({
+        where: { user: { id: userId } },
+        skip: (page - 1) * limit,
+        take: limit,
       });
-      if (!transactions) {
-          throw new NotFoundException(`Transactions for user ID ${userId} not found.`);
+      if (!transactions || transactions.length === 0) {
+        throw new NotFoundException(`Transactions for user ID ${userId} not found.`);
       }
       return transactions;
     } catch (error) {
       throw new HttpException({
-          status: HttpStatus.BAD_REQUEST,
-          error: `Error finding transaction: ${error.message}`,
+        status: HttpStatus.BAD_REQUEST,
+        error: `Error finding transactions: ${error.message}`,
       }, HttpStatus.BAD_REQUEST);
     }
   }
-
 
   async getUserTransactionById(userId: string, transactionId: string): Promise<Transaction> {
     try {
