@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DeleteResult, In, Repository } from 'typeorm';
 import { Ebook, EbooksReader } from './entities/ebook.entity';
@@ -9,6 +9,7 @@ import { WishListDto } from './dto/wishlist';
 import { AuthService } from '../auth/auth.service';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 import { validateUuid } from '../utils/validateUuid';
+import { Vote } from './entities/vote.entity';
 import supabase from 'src/utils/createClient';
 
 @Injectable()
@@ -22,7 +23,9 @@ export class EbooksService {
     private readonly ebookReaderRepository: Repository<EbooksReader>,
     @InjectRepository(EbooksReader)
     private ebooksReaderRepository: Repository<EbooksReader>,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    @InjectRepository(Vote)
+    private readonly votesRepository: Repository<Vote>,
   ) { }
 
   public async addToWishlist(dto: WishListDto): Promise<Wish> {
@@ -94,27 +97,27 @@ export class EbooksService {
     }
   }
 
-  public async create(createEbookDto: CreateEbookDto): Promise<Ebook> {
+  public async create(createEbookDto: CreateEbookDto, userId: string): Promise<Ebook> {
     try {
-      validateUuid(createEbookDto.author);
+      validateUuid(userId);
 
-      const ebookExists = await this.findByTitle(createEbookDto.title);
+      const ebookExists = await this.findByIsbn(createEbookDto.isbn);
 
       if (ebookExists) {
         throw new Error('Ebook already exists');
       }
 
-      const user = await this.authService.getUserById(createEbookDto.author);
+      const user = await this.authService.getUserById(userId);
 
       if (!user) {
-        console.error(`User with ID ${createEbookDto.author} not found.`);
+        console.error(`User with ID ${userId} not found.`);
         return null;
       }
 
       const author = await this.authService.getAuthorByUser(user.id);
 
       if (!author) {
-        console.error(`Author with ID ${createEbookDto.author} not found.`);
+        console.error(`Author with ID ${userId} not found.`);
         return null;
       }
 
@@ -146,9 +149,12 @@ export class EbooksService {
     }
   }
 
-  public async findAll(): Promise<Ebook[]> {
+  public async findAll(page: number = 1, limit: number = 10): Promise<Ebook[]> {
     try {
-      return this.ebooksRepository.find();
+      return await this.ebooksRepository.find({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -194,9 +200,9 @@ export class EbooksService {
     return ebooks;
   }
 
-  public async findByTitle(title: string): Promise<Ebook> {
+  public async findByIsbn(isbn: string): Promise<Ebook> {
     try {
-      const ebook = await this.ebooksRepository.findOne({ where: { title } });
+      const ebook = await this.ebooksRepository.findOne({ where: { isbn } });
       return ebook;
     } catch (error) {
       throw error;
@@ -229,28 +235,31 @@ export class EbooksService {
     return newEbook;
   }
 
-  async findAllEbooksByReader(readerId: string): Promise<Ebook[]> {
-    try{
+  async findAllEbooksByReader(readerId: string, page: number = 1, limit: number = 10): Promise<Ebook[]> {
+    try {
       validateUuid(readerId);
-      const reader = this.ebookReaderRepository.findOne({where:{id:readerId}});
-      if(!reader){
-        throw new Error('User reader not exists');
+      const reader = await this.ebookReaderRepository.findOne({ where: { readerId: readerId } });
+      if (!reader) {
+        return [];
       }
       const ebooksReader = await this.ebookReaderRepository.find({
         where: { readerId: readerId }
       });
-  
+
       const ebookIds = ebooksReader.map(er => er.ebookId);
-  
+
       if (ebookIds.length > 0) {
-        return this.ebooksRepository.findBy({ id: In(ebookIds) });
+        return this.ebooksRepository.find({
+          where: { id: In(ebookIds) },
+          skip: (page - 1) * limit,
+          take: limit,
+        });
       }
-  
+
       return [];
-    }catch(error){
-      throw new NotFoundException(error.message);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-  
   }
 
   async addEbooksToReader(userId: string, ebooks: Ebook[]): Promise<void> {
@@ -276,4 +285,45 @@ export class EbooksService {
       where: { id: In(ids) }
     });
   }
+
+  async addVote(userId: string, ebookId: string, value: number): Promise<Ebook> {
+    if (typeof value !== 'number' || isNaN(value)) {
+      throw new BadRequestException('Invalid value');
+    }
+    const user = await this.authService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+  
+    const ebook = await this.ebooksRepository.findOne({ where: { id: ebookId }, relations: ['votes'] });
+    if (!ebook) {
+      throw new NotFoundException('Ebook not found');
+    }
+  
+    const ownership = await this.ebookReaderRepository.findOne({ where: { readerId: userId, ebookId: ebookId } });
+    if (!ownership) {
+      throw new ForbiddenException('You do not own this ebook');
+    }
+  
+    let vote = await this.votesRepository.findOne({ where: { user: { id: userId }, ebook: { id: ebookId } } });
+    if (vote) {
+      vote.value = value;
+    } else {
+      vote = this.votesRepository.create({ value, ebook, user });
+    }
+
+    await this.votesRepository.save(vote);
+  
+    const votes = await this.votesRepository.find({ where: { ebook: { id: ebookId } } });
+    ebook.rating = this.calculateRating(votes);
+  
+    return await this.ebooksRepository.save(ebook);
+  }
+  
+
+  private calculateRating(votes: Vote[]): number {
+    const total = votes.reduce((acc, vote) => acc + vote.value, 0);
+    return total / votes.length;
+  }
+  
 }

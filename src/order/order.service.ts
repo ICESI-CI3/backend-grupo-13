@@ -88,8 +88,11 @@ export class OrderService {
     return ebooks.reduce((total, ebook) => total + ebook.price, 0);
   }
 
-  async getAllOrders(): Promise<Order[]> {
-    return this.orderRepository.find();
+  async getAllOrders(page: number = 1, limit: number = 10): Promise<Order[]> {
+    return this.orderRepository.find({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   async getOrderById(id: string): Promise<Order> {
@@ -111,19 +114,23 @@ export class OrderService {
     }
   }
 
-  async getUserOrders(userId: string): Promise<Order[]> {
+  async getUserOrders(userId: string, page: number = 1, limit: number = 10): Promise<Order[]> {
     try {
       validateUuid(userId);
-      const orders = await this.orderRepository.find({where: {user: { id: userId }},
-        relations: ['user', 'ebooks']  });
-      if (!orders) {
-          throw new NotFoundException(`Order for user ID ${userId} not found.`);
+      const orders = await this.orderRepository.find({
+        where: { user: { id: userId } },
+        relations: ['user', 'ebooks'],
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+      if (!orders || orders.length === 0) {
+        throw new NotFoundException(`Orders for user ID ${userId} not found.`);
       }
       return orders;
     } catch (error) {
       throw new HttpException({
-          status: HttpStatus.BAD_REQUEST,
-          error: `Error finding order: ${error.message}`,
+        status: HttpStatus.BAD_REQUEST,
+        error: `Error finding orders: ${error.message}`,
       }, HttpStatus.BAD_REQUEST);
     }
   }

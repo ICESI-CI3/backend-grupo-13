@@ -1,5 +1,6 @@
 import { Author } from '../../auth/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { Vote } from './vote.entity';
 
 @Entity()
 export class Ebook {
@@ -7,14 +8,14 @@ export class Ebook {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   title: string;
 
   @Column()
   publisher: string;
 
-  @ManyToOne(() => Author)
-  @JoinColumn()
+  @ManyToOne(() => Author, author => author.booksWritten)
+  @JoinColumn({ name: 'authorId' })
   author: Author;
 
   @Column()
@@ -28,6 +29,18 @@ export class Ebook {
 
   @Column()
   fileData: string;
+
+  @Column({ unique: true })
+  isbn: string;
+
+  @Column()
+  version: string;
+
+  @Column('float')
+  rating: number;
+
+  @OneToMany(() => Vote, vote => vote.ebook, { eager: true })
+  votes: Vote[];
 }
 
 @Entity()

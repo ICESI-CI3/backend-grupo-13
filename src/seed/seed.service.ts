@@ -43,7 +43,7 @@ export class SeederService {
         userId: user1.id,
         penName: 'Author1',
         biography: 'Biography of Author1',
-        booksWritten: 'Books by Author1',
+        booksWritten: [],
       });
 
       // Insertar lectores
@@ -61,7 +61,7 @@ export class SeederService {
         overview: 'Overview of Ebook1',
         price: 20000,
         stock: 100,
-        fileData: []
+        fileData: ""
       });
 
       // Insertar orden

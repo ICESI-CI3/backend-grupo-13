@@ -1,6 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { RoleEnum } from "../enum/role.enum";
 import { Order } from "../../order/entities/order.entity";
+import { Vote } from "src/ebooks/entities/vote.entity";
+import { Ebook } from "src/ebooks/entities/ebook.entity";
 
 @Entity()
 export abstract class User {
@@ -19,7 +21,11 @@ export abstract class User {
   @Column({ type: 'enum', default: RoleEnum.USER, enum: RoleEnum })
   role: RoleEnum;
 
+  @OneToMany(() => Order, order => order.user, { eager: true })
   orders: Order[];
+
+  @OneToMany(() => Vote, vote => vote.user, { eager: true })
+  votes: Vote[];
 }
 
 @Entity()
@@ -52,7 +58,7 @@ export class Author {
   @Column()
   biography: string;
 
-  @Column({ type: 'text' })
-  booksWritten: string;
+  @OneToMany(() => Ebook, ebook => ebook.author, { eager: true })
+  booksWritten: Ebook[];
 
 }

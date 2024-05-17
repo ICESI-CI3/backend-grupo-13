@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, UseGuards, HttpException, HttpStatus, NotFoundException, Post } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards, HttpException, HttpStatus, NotFoundException, Post, Query, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { DeleteResult } from 'typeorm';
 import { EbooksService } from './ebooks.service';
@@ -11,22 +11,32 @@ import { RoleEnum } from '../auth/enum/role.enum';
 import { VisualizeEbookDto } from './dto/visualize-ebook.dto';
 import { InfoEbookDto } from './dto/info-ebook.dto';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
+import { VoteDto } from './dto/create-vote.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('ebooks')
 export class EbooksController {
   constructor(private readonly ebooksService: EbooksService) { }
 
+  @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
+  @Post('/vote/:ebookId')
+  async addVote(@Param('ebookId') ebookId: string, @Body() voteDto: VoteDto, @Req() req) {
+    const userId = req.user.userId; 
+    return this.ebooksService.addVote(userId, ebookId, voteDto.value);
+  }
+
   @Roles(RoleEnum.AUTHOR)
   @Post()
-  public async create(@Body() createEbookDto: CreateEbookDto): Promise<Ebook> {
-    return await this.ebooksService.create(createEbookDto);
+  public async create(@Body() createEbookDto: CreateEbookDto,@Req() req): Promise<Ebook> {
+    return await this.ebooksService.create(createEbookDto,req.user.userId);
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Get()
-  public async findAll(): Promise<Ebook[]> {
-    return this.ebooksService.findAll();
+  public async findAll(@Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.ebooksService.findAll(pageNumber, limitNumber);
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
@@ -60,9 +70,24 @@ export class EbooksController {
     return this.ebooksService.assignEbookToReader(createEbookReaderDto);
   }
 
-  @Get('/:readerId')
-  getBooksByReader(@Param('readerId') readerId: string): Promise<Ebook[]> {
-    return this.ebooksService.findAllEbooksByReader(readerId);
+  
+  @Get('/mybooks')
+  public async getMyBooks(@Req() req, @Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.ebooksService.findAllEbooksByReader(req.user.userId, pageNumber, limitNumber);
   }
+
+
+
+  @Roles(RoleEnum.ADMIN)
+  @Get('/:readerId')
+  public async getBooksByReader(@Param('readerId') readerId: string,@Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.ebooksService.findAllEbooksByReader(readerId, pageNumber, limitNumber);
+  }
+
+
 
 }

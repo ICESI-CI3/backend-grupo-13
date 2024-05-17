@@ -1,9 +1,9 @@
-import { Controller, Post, Body, Get, UseGuards, Req, Param, HttpException, Delete, HttpStatus, NotFoundException, Patch } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, Param, Delete, Patch, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from './entities/user.entity';
+import { Author, Reader, User } from './entities/user.entity';
 import { DeleteResult } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesGuard } from './guard/roles.guard';
@@ -20,8 +20,21 @@ export class AuthController {
       return req.user;
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/author')
+  getAuthorProfile(@Req() req):Promise<Author> {
+    return this.authService.findAuthorById(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/reader')
+  getReaderProfile(@Req() req):Promise<Reader> {
+    return this.authService.findReaderById(req.user.userId);
+  }
+
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto): Promise<{ access_token: string }> {
+    console.log(createUserDto)
     return this.authService.createUser(createUserDto);
   }
 
@@ -46,8 +59,10 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/')
-  async getAllUsers(): Promise<User[]> {
-      return this.authService.getAllUsers();
+  async getAllUsers(@Query('page') page: string,@Query('limit') limit: string, ): Promise<User[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.authService.getAllUsers(pageNumber, limitNumber);  
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -64,6 +79,19 @@ export class AuthController {
     return this.authService.remove(id);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @Get('readers/:id')
+  async getReaderById(@Param('id') id: string): Promise<Reader> {
+    return this.authService.findReaderById(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @Get('authors/:id')
+  async getAuthorById(@Param('id') id: string): Promise<Author> {
+    return this.authService.findAuthorById(id);
+  }
  
   
 }

@@ -23,33 +23,41 @@ export class PaymentController {
  
    @UseGuards(AuthGuard('jwt'),RolesGuard)
    @Get('/transactions')
-   async getUserTransactions(@Req() req): Promise<Transaction[]> {
-       return await this.paymentService.getUserTransactions(req.user.userId);
+   async getUserTransactions(@Req() req, @Query('page') page: string,    @Query('limit') limit: string,  ): Promise<Transaction[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return await this.paymentService.getUserTransactions(req.user.userId,pageNumber, limitNumber);
    }
 
   //Funciona para cuando el usuario le da el boton de mirar volver a pagina despues de que se acaba la transaccion en payu
   @Get('payu-response')
   async handleResponse(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
+    console.log("response")
     return await this.paymentService.handleResponse(transactionData,res);
   }
 
   //Funciona cuando el servidor de payu asincronicamente le informa al servidor de la confirmacion de la transaccion
   @Get('payu-confirmation')
   async handleConfirmation(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
+    console.log("confirmation")
     return await this.paymentService.handleConfirmation(transactionData,res);
   }
   
   @UseGuards(AuthGuard('jwt'),RolesGuard)
    @Roles(RoleEnum.ADMIN)
    @Get()  
-  async getAllTransactions(): Promise<Transaction[]> {
-      return await this.paymentService.getAllTransactions();
+  async getAllTransactions( @Query('page') page: string,    @Query('limit') limit: string,  ): Promise<Transaction[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.paymentService.getAllTransactions(pageNumber, limitNumber);
   }
 
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/:id')
-  async getTransactionById(@Param('id') id: string): Promise<Transaction> {
-      return await this.paymentService.getTransactionById(id);
-  }
+  async getTransactionById( @Param('userId') userId: string,  @Query('page') page: string,  @Query('limit') limit: string,): Promise<Transaction[]> {
+  const pageNumber = parseInt(page, 10) || 1;
+  const limitNumber = parseInt(limit, 10) || 10;
+  return this.paymentService.getUserTransactions(userId, pageNumber, limitNumber);
+}
 }
