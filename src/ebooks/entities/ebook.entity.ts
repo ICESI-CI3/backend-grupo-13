@@ -26,10 +26,8 @@ export class Ebook {
   @Column()
   stock: number;
 
-  @Column({
-    type: 'bytea',
-  })
-  fileData: Uint8Array;
+  @Column()
+  fileData: string;
 }
 
 @Entity()

@@ -9,6 +9,7 @@ import { WishListDto } from './dto/wishlist';
 import { AuthService } from '../auth/auth.service';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 import { validateUuid } from '../utils/validateUuid';
+import supabase from 'src/utils/createClient';
 
 @Injectable()
 export class EbooksService {
@@ -58,6 +59,7 @@ export class EbooksService {
       }, HttpStatus.BAD_REQUEST);
     }
   }
+  
   public async removeFromWishlist(dto: WishListDto): Promise<DeleteResult> {
     try {
       validateUuid(dto.reader);
@@ -116,11 +118,21 @@ export class EbooksService {
         return null;
       }
 
-      const binaryData: Uint8Array = Buffer.from(createEbookDto.fileData, 'base64');
+      const { data, error } = await supabase
+        .storage
+        .from('ebooks-bucket')
+        .upload(`pdfs/${createEbookDto.title}.pdf`, Buffer.from(createEbookDto.fileData, 'base64'), {
+          contentType: 'application/pdf',
+        });
+
+      if (error) {
+        throw new Error(`Failed to upload PDF: ${error.message}`);
+      }
+
       const newEbook = this.ebooksRepository.create({
         ...createEbookDto,
         author: author,
-        fileData: binaryData,
+        fileData: data.path
       });
 
       await this.ebooksRepository.save(newEbook);
