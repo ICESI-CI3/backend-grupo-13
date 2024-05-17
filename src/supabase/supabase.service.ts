@@ -8,8 +8,8 @@ export class SupabaseService {
   private supabase: SupabaseClient;
 
   constructor(private configService: ConfigService) {
-    const supabaseUrl = this.configService.get<string>('NEXT_PUBLIC_SUPABASE_URL');
-    const supabaseAnonKey = this.configService.get<string>('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+    const supabaseUrl = this.configService.get<string>('NEST_PUBLIC_SUPABASE_URL');
+    const supabaseAnonKey = this.configService.get<string>('NEST_PUBLIC_SUPABASE_ANON_KEY');
 
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error('Supabase URL and Anon Key must be provided');
