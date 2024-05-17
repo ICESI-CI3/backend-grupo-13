@@ -172,7 +172,14 @@ export class AuthService {
       throw error;
     }
   }
-
+  public async findById(id: string): Promise<User>{
+    try{
+      const user = await this.userRepository.findOne({where: {id}});
+      return user;
+    }catch(error){
+      throw error;
+    }
+  }
   public async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     try {
       const user = await this.getUserById(id); 
@@ -208,5 +215,24 @@ export class AuthService {
       default:
           throw new Error('Not a valid role');
     }
+  }
+  async findReaderById(userId: string): Promise<any> {
+    const reader = await this.readerRepository.findOne({ where: { userId } });
+    if (!reader) {
+      throw new NotFoundException('Reader not found');
+    }
+    const id = userId
+    const user = await this.userRepository.findOne({ where: { id } });
+    return {user,reader};
+  }
+
+  async findAuthorById(userId: string): Promise<any> {
+    const author = await this.authorRepository.findOne({ where: { userId } });
+    if (!author) {
+      throw new NotFoundException('Author not found');
+    }
+    const id = userId
+    const user = await this.userRepository.findOne({ where: { id } });
+    return {user,author};
   }
 }

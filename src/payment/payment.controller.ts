@@ -32,12 +32,14 @@ export class PaymentController {
   //Funciona para cuando el usuario le da el boton de mirar volver a pagina despues de que se acaba la transaccion en payu
   @Get('payu-response')
   async handleResponse(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
+    console.log("response")
     return await this.paymentService.handleResponse(transactionData,res);
   }
 
   //Funciona cuando el servidor de payu asincronicamente le informa al servidor de la confirmacion de la transaccion
   @Get('payu-confirmation')
   async handleConfirmation(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
+    console.log("confirmation")
     return await this.paymentService.handleConfirmation(transactionData,res);
   }
   

@@ -99,7 +99,7 @@ export class EbooksService {
     try {
       validateUuid(userId);
 
-      const ebookExists = await this.findByTitle(createEbookDto.title);
+      const ebookExists = await this.findByIsbn(createEbookDto.isbn);
 
       if (ebookExists) {
         throw new Error('Ebook already exists');
@@ -186,9 +186,9 @@ export class EbooksService {
     return ebooks;
   }
 
-  public async findByTitle(title: string): Promise<Ebook> {
+  public async findByIsbn(isbn: string): Promise<Ebook> {
     try {
-      const ebook = await this.ebooksRepository.findOne({ where: { title } });
+      const ebook = await this.ebooksRepository.findOne({ where: { isbn } });
       return ebook;
     } catch (error) {
       throw error;
@@ -224,9 +224,9 @@ export class EbooksService {
   async findAllEbooksByReader(readerId: string, page: number = 1, limit: number = 10): Promise<Ebook[]> {
     try {
       validateUuid(readerId);
-      const reader = await this.ebookReaderRepository.findOne({ where: { id: readerId } });
+      const reader = await this.ebookReaderRepository.findOne({ where: { readerId: readerId } });
       if (!reader) {
-        throw new NotFoundException('User reader does not exist');
+        return [];
       }
       const ebooksReader = await this.ebookReaderRepository.find({
         where: { readerId: readerId }
@@ -273,35 +273,39 @@ export class EbooksService {
   }
 
   async addVote(userId: string, ebookId: string, value: number): Promise<Ebook> {
-
-    const user = await this.authService.findByUsername(userId);
+    if (typeof value !== 'number' || isNaN(value)) {
+      throw new BadRequestException('Invalid value');
+    }
+    const user = await this.authService.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
+  
     const ebook = await this.ebooksRepository.findOne({ where: { id: ebookId }, relations: ['votes'] });
     if (!ebook) {
       throw new NotFoundException('Ebook not found');
     }
-
-    const ownership = await this.ebookReaderRepository.findOne({ where: { readerId:  userId, ebookId: ebookId } });
+  
+    const ownership = await this.ebookReaderRepository.findOne({ where: { readerId: userId, ebookId: ebookId } });
     if (!ownership) {
       throw new ForbiddenException('You do not own this ebook');
     }
-    
-
+  
     let vote = await this.votesRepository.findOne({ where: { user: { id: userId }, ebook: { id: ebookId } } });
     if (vote) {
-      vote.value = value; 
+      vote.value = value;
     } else {
       vote = this.votesRepository.create({ value, ebook, user });
     }
-    await this.votesRepository.save(vote);
 
-    ebook.rating = this.calculateRating(await this.votesRepository.find({ where: { ebook: { id: ebookId } } }));;
-    
+    await this.votesRepository.save(vote);
+  
+    const votes = await this.votesRepository.find({ where: { ebook: { id: ebookId } } });
+    ebook.rating = this.calculateRating(votes);
+  
     return await this.ebooksRepository.save(ebook);
   }
+  
 
   private calculateRating(votes: Vote[]): number {
     const total = votes.reduce((acc, vote) => acc + vote.value, 0);

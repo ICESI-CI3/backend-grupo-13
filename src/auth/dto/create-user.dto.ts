@@ -1,4 +1,5 @@
 import { IsString, IsEmail, IsNotEmpty, IsOptional, IsInt, MinLength } from 'class-validator';
+import { Ebook } from 'src/ebooks/entities/ebook.entity';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -37,7 +38,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  booksWritten?: string;
+  booksWritten?: Ebook[];
 
   @IsOptional()
   @IsInt()

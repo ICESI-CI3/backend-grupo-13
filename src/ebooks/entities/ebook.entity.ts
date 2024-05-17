@@ -14,8 +14,8 @@ export class Ebook {
   @Column()
   publisher: string;
 
-  @ManyToOne(() => Author)
-  @JoinColumn()
+  @ManyToOne(() => Author, author => author.booksWritten)
+  @JoinColumn({ name: 'authorId' })
   author: Author;
 
   @Column()
@@ -39,7 +39,7 @@ export class Ebook {
   @Column('float')
   rating: number;
 
-  @OneToMany(() => Vote, vote => vote.ebook)
+  @OneToMany(() => Vote, vote => vote.ebook, { eager: true })
   votes: Vote[];
 }
 

@@ -12,11 +12,9 @@ export class Vote {
   @Column()
   value: number;
 
-  @ManyToOne(() => User, user => user.votes)
-  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => User)
   user: User;
 
-  @ManyToOne(() => Ebook, ebook => ebook.votes)
-  @JoinColumn({ name: 'ebookId' })
+  @ManyToOne(() => Ebook)
   ebook: Ebook;
 }

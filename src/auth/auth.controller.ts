@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from './entities/user.entity';
+import { Author, Reader, User } from './entities/user.entity';
 import { DeleteResult } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesGuard } from './guard/roles.guard';
@@ -18,6 +18,18 @@ export class AuthController {
   @Get('/session')
   getProfile(@Req() req):Promise<User> {
       return req.user;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/author')
+  getAuthorProfile(@Req() req):Promise<Author> {
+    return this.authService.findAuthorById(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/reader')
+  getReaderProfile(@Req() req):Promise<Reader> {
+    return this.authService.findReaderById(req.user.userId);
   }
 
   @Post('register')
@@ -67,6 +79,19 @@ export class AuthController {
     return this.authService.remove(id);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @Get('readers/:id')
+  async getReaderById(@Param('id') id: string): Promise<Reader> {
+    return this.authService.findReaderById(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @Get('authors/:id')
+  async getAuthorById(@Param('id') id: string): Promise<Author> {
+    return this.authService.findAuthorById(id);
+  }
  
   
 }

@@ -19,9 +19,9 @@ export class EbooksController {
   constructor(private readonly ebooksService: EbooksService) { }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
-  @Post(':ebookId/vote')
+  @Post('/vote/:ebookId')
   async addVote(@Param('ebookId') ebookId: string, @Body() voteDto: VoteDto, @Req() req) {
-    const userId = req.user.id; 
+    const userId = req.user.userId; 
     return this.ebooksService.addVote(userId, ebookId, voteDto.value);
   }
 
@@ -70,8 +70,19 @@ export class EbooksController {
     return this.ebooksService.assignEbookToReader(createEbookReaderDto);
   }
 
+  
+  @Get('/mybooks')
+  public async getMyBooks(@Req() req, @Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    return this.ebooksService.findAllEbooksByReader(req.user.userId, pageNumber, limitNumber);
+  }
+
+
+
+  @Roles(RoleEnum.ADMIN)
   @Get('/:readerId')
-  getBooksByReader(@Param('readerId') readerId: string,@Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+  public async getBooksByReader(@Param('readerId') readerId: string,@Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
     const pageNumber = parseInt(page, 10) || 1;
     const limitNumber = parseInt(limit, 10) || 10;
     return this.ebooksService.findAllEbooksByReader(readerId, pageNumber, limitNumber);
