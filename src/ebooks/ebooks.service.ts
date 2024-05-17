@@ -10,10 +10,11 @@ import { AuthService } from '../auth/auth.service';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 import { validateUuid } from '../utils/validateUuid';
 import { Vote } from './entities/vote.entity';
-import supabase from 'src/utils/createClient';
+import { SupabaseService } from 'src/supabase/supabase.service';
 
 @Injectable()
 export class EbooksService {
+  private supabase;
   constructor(
     @InjectRepository(Ebook)
     private readonly ebooksRepository: Repository<Ebook>,
@@ -26,7 +27,10 @@ export class EbooksService {
     private readonly authService: AuthService,
     @InjectRepository(Vote)
     private readonly votesRepository: Repository<Vote>,
-  ) { }
+    private readonly supabaseService: SupabaseService
+  ) { 
+    this.supabase = supabaseService.getClient;
+  }
 
   public async addToWishlist(dto: WishListDto): Promise<Wish> {
     try {
@@ -121,16 +125,7 @@ export class EbooksService {
         return null;
       }
 
-      const { data, error } = await supabase
-        .storage
-        .from('ebooks-bucket')
-        .upload(`pdfs/${createEbookDto.title}.pdf`, Buffer.from(createEbookDto.fileData, 'base64'), {
-          contentType: 'application/pdf',
-        });
-
-      if (error) {
-        throw new Error(`Failed to upload PDF: ${error.message}`);
-      }
+     const data = await this.supabaseService.uploadEbook(createEbookDto);
 
       const newEbook = this.ebooksRepository.create({
         ...createEbookDto,
