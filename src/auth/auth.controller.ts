@@ -40,6 +40,7 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto): Promise<{ access_token: string }> {
+    console.log("Trying to login", loginUserDto.email, loginUserDto.password)
     return this.authService.login(loginUserDto);
   }
 
