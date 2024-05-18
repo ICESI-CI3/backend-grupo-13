@@ -9,13 +9,13 @@ export abstract class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   username: string;
 
   @Column()
   password: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column({ type: 'enum', default: RoleEnum.USER, enum: RoleEnum })
@@ -39,7 +39,7 @@ export class Reader {
   @Column()
   favoriteGenre: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   bookList: string;
 
 }
@@ -58,7 +58,7 @@ export class Author {
   @Column()
   biography: string;
 
-  @OneToMany(() => Ebook, ebook => ebook.author, { eager: true })
+  @OneToMany(() => Ebook, ebook => ebook.author, { eager: true, nullable: true })
   booksWritten: Ebook[];
 
 }

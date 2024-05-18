@@ -57,11 +57,11 @@ export class AuthService {
       console.log("aaaa")
 
       if(rol==RoleEnum.USER){
-        if(createUserDto.favoriteGenre == null || createUserDto.bookList == null){
+        if(createUserDto.favoriteGenre == null){
           throw new Error('Missing attributes for a reader');
         }
       }else if(rol==RoleEnum.AUTHOR){
-        if(createUserDto.penName == null || createUserDto.biography == null || createUserDto.booksWritten == null){
+        if(createUserDto.penName == null || createUserDto.biography == null){
           throw new Error('Missing attributes for a author');
         }
       }
