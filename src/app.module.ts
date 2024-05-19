@@ -9,7 +9,6 @@ import { EbooksModule } from './ebooks/ebooks.module';
 import { SeederModule } from './seed/seed.module';
 import { PaymentModule } from './payment/payment.module';
 import { OrderModule } from './order/order.module';
-import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [ 
@@ -32,8 +31,7 @@ import { SupabaseModule } from './supabase/supabase.module';
     EbooksModule,
     SeederModule,
     PaymentModule,
-    OrderModule,
-    SupabaseModule],
+    OrderModule],
   controllers: [AppController],
   providers: [AppService],
 })

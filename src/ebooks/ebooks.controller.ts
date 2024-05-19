@@ -27,8 +27,9 @@ export class EbooksController {
 
   @Roles(RoleEnum.AUTHOR)
   @Post()
-  public async create(@Body() createEbookDto: CreateEbookDto,@Req() req): Promise<Ebook> {
-    return await this.ebooksService.create(createEbookDto,req.user.userId);
+  public async create(@Body() createEbookDto: CreateEbookDto): Promise<Ebook> {
+    console.log("Dto: ",createEbookDto);
+    return await this.ebooksService.create(createEbookDto);
   }
 
   @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)

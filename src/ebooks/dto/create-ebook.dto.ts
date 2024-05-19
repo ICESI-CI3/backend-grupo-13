@@ -40,7 +40,7 @@ export class CreateEbookDto {
   @IsString()
   version: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   rating: number;
 }
