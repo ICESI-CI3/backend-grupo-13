@@ -10,7 +10,6 @@ import { AuthService } from '../auth/auth.service';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 import { validateUuid } from '../utils/validateUuid';
 import { Vote } from './entities/vote.entity';
-import { SupabaseService } from 'src/supabase/supabase.service';
 
 @Injectable()
 export class EbooksService {
@@ -26,11 +25,8 @@ export class EbooksService {
     private ebooksReaderRepository: Repository<EbooksReader>,
     private readonly authService: AuthService,
     @InjectRepository(Vote)
-    private readonly votesRepository: Repository<Vote>,
-    private readonly supabaseService: SupabaseService
-  ) { 
-    this.supabase = supabaseService.getClient;
-  }
+    private readonly votesRepository: Repository<Vote>
+  ) { }
 
   public async addToWishlist(dto: WishListDto): Promise<Wish> {
     try {
@@ -101,9 +97,11 @@ export class EbooksService {
     }
   }
 
-  public async create(createEbookDto: CreateEbookDto, userId: string): Promise<Ebook> {
+  public async create(createEbookDto: CreateEbookDto): Promise<Ebook> {
     try {
+      const userId = createEbookDto.authorId;
       validateUuid(userId);
+      console.log(userId);
 
       const ebookExists = await this.findByIsbn(createEbookDto.isbn);
 
@@ -125,12 +123,9 @@ export class EbooksService {
         return null;
       }
 
-     const data = await this.supabaseService.uploadEbook(createEbookDto);
-
       const newEbook = this.ebooksRepository.create({
         ...createEbookDto,
-        author: author,
-        fileData: data.path
+        author: author
       });
 
       await this.ebooksRepository.save(newEbook);
