@@ -182,14 +182,34 @@ export class AuthService {
   }
   public async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      const user = await this.getUserById(id); 
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
       const updatedUser = Object.assign(user, updateUserDto);
       await this.userRepository.save(updatedUser);
+
+      if (updatedUser.role === 'Reader') {
+        const reader = await this.readerRepository.findOne({ where: { userId: id } });
+        if (reader) {
+          Object.assign(reader, updateUserDto);
+          await this.readerRepository.save(reader);
+        }
+      } else if (updatedUser.role === 'Author') {
+        const author = await this.authorRepository.findOne({ where: { userId: id } });
+        if (author) {
+          Object.assign(author, updateUserDto);
+          await this.authorRepository.save(author);
+        }
+      }
+
       return updatedUser;
     } catch (error) {
-        throw new NotFoundException(`Error finding user: ${error.message}`);
+      throw new NotFoundException(`Error updating user: ${error.message}`);
     }
   }
+
 
   public async remove(id: string): Promise<DeleteResult> {
     try {

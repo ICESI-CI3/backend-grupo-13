@@ -15,13 +15,26 @@ export class UpdateUserDto {
   username?: string;
 
   @IsOptional()
-  @IsString()
   @IsEmail()
   email?: string;
 
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  roles?: string[];
+  @IsString()
+  favoriteGenre?: string;
 
+  @IsOptional()
+  @IsString()
+  bookList?: string;
+
+  @IsOptional()
+  @IsString()
+  penName?: string;
+
+  @IsOptional()
+  @IsString()
+  biography?: string;
+
+  @IsOptional()
+  @IsString()
+  role?: string;
 }

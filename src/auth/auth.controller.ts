@@ -21,15 +21,15 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/author')
-  getAuthorProfile(@Req() req):Promise<Author> {
-    return this.authService.findAuthorById(req.user.userId);
+  @Get('/author/:id')
+  getAuthorProfile(@Param('id') id: string):Promise<Author> {
+    return this.authService.findAuthorById(id);
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/reader')
-  getReaderProfile(@Req() req):Promise<Reader> {
-    return this.authService.findReaderById(req.user.userId);
+  @Get('/reader/:id')
+  getReaderProfile(@Param('id') id: string):Promise<Reader> {
+    return this.authService.findReaderById(id);
   }
 
   @Post('register')
@@ -51,7 +51,6 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(RoleEnum.ADMIN)
   @Get('/:id')
   async getUserById(@Param('id') id: string): Promise<User | undefined> {
       return this.authService.getUserById(id);
@@ -67,7 +66,6 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(RoleEnum.ADMIN)
   @Patch('/:id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
     return this.authService.update(id, updateUserDto);
