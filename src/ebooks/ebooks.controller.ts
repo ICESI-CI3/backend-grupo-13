@@ -13,66 +13,65 @@ import { InfoEbookDto } from './dto/info-ebook.dto';
 import { CreateEbookReaderDto } from './dto/create-ebookreader.dto';
 import { VoteDto } from './dto/create-vote.dto';
 
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+// @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('ebooks')
 export class EbooksController {
   constructor(private readonly ebooksService: EbooksService) { }
 
-  @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
+  // // @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Post('/vote/:ebookId')
   async addVote(@Param('ebookId') ebookId: string, @Body() voteDto: VoteDto, @Req() req) {
-    const userId = req.user.userId; 
+    const userId = req.user.userId;
     return this.ebooksService.addVote(userId, ebookId, voteDto.value);
   }
 
-  @Roles(RoleEnum.AUTHOR)
+  // // @Roles(RoleEnum.AUTHOR)
   @Post()
-  public async create(@Body() createEbookDto: CreateEbookDto,@Req() req): Promise<Ebook> {
-    return await this.ebooksService.create(createEbookDto,req.user.userId);
+  public async create(@Body() createEbookDto: CreateEbookDto, @Req() req): Promise<Ebook> {
+    return await this.ebooksService.create(createEbookDto, req.user.userId);
   }
 
-  @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
+  // // @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Get()
-  public async findAll(@Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+  public async findAll(@Query('page') page: string, @Query('limit') limit: string,): Promise<Ebook[]> {
     const pageNumber = parseInt(page, 10) || 1;
     const limitNumber = parseInt(limit, 10) || 10;
     return this.ebooksService.findAll(pageNumber, limitNumber);
   }
 
-  @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
+  // @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Get('info/:id')
   public async findById(@Param('id') id: string): Promise<InfoEbookDto> {
     const ebook = await this.ebooksService.findById(id);
-    return new InfoEbookDto(ebook.title, ebook.publisher, ebook.author.penName, ebook.overview, ebook.price, ebook.stock);
+    return new InfoEbookDto(ebook);
   }
 
-  @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
+  // @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Get('visualize/:id')
   public async visualizeById(@Param('id') id: string): Promise<VisualizeEbookDto> {
     const ebook = await this.ebooksService.findById(id);
     return new VisualizeEbookDto(ebook.title, Buffer.from(ebook.fileData).toString("base64"));
   }
 
-  @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
+  // @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
   @Patch('visualize/:id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateEbookDto): Promise<Ebook> {
     return this.ebooksService.update(id, updateUserDto);
   }
 
-  @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
+  // @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
   @Delete(':id')
   public async remove(@Param('id') id: string): Promise<DeleteResult> {
     return this.ebooksService.remove(id);
   }
 
   @Post('/ebookReader')
-  public async assignEbookToReader(@Body() createEbookReaderDto: CreateEbookReaderDto):Promise<EbooksReader>{
+  public async assignEbookToReader(@Body() createEbookReaderDto: CreateEbookReaderDto): Promise<EbooksReader> {
     return this.ebooksService.assignEbookToReader(createEbookReaderDto);
   }
 
-  
   @Get('/mybooks')
-  public async getMyBooks(@Req() req, @Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+  public async getMyBooks(@Req() req, @Query('page') page: string, @Query('limit') limit: string,): Promise<Ebook[]> {
     const pageNumber = parseInt(page, 10) || 1;
     const limitNumber = parseInt(limit, 10) || 10;
     return this.ebooksService.findAllEbooksByReader(req.user.userId, pageNumber, limitNumber);
@@ -80,9 +79,9 @@ export class EbooksController {
 
 
 
-  @Roles(RoleEnum.ADMIN)
+  // @Roles(RoleEnum.ADMIN)
   @Get('/:readerId')
-  public async getBooksByReader(@Param('readerId') readerId: string,@Query('page') page: string,  @Query('limit') limit: string,): Promise<Ebook[]> {
+  public async getBooksByReader(@Param('readerId') readerId: string, @Query('page') page: string, @Query('limit') limit: string,): Promise<Ebook[]> {
     const pageNumber = parseInt(page, 10) || 1;
     const limitNumber = parseInt(limit, 10) || 10;
     return this.ebooksService.findAllEbooksByReader(readerId, pageNumber, limitNumber);

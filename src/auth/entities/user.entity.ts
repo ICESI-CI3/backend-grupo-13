@@ -34,14 +34,13 @@ export class Reader {
   id: string;
 
   @Column()
-  userId: string; 
+  userId: string;
 
   @Column()
   favoriteGenre: string;
 
   @Column({ type: 'text', nullable: true })
   bookList: string;
-
 }
 
 @Entity()
@@ -50,7 +49,7 @@ export class Author {
   id: string;
 
   @Column()
-  userId: string; 
+  userId: string;
 
   @Column()
   penName: string;
@@ -58,7 +57,6 @@ export class Author {
   @Column()
   biography: string;
 
-  @OneToMany(() => Ebook, ebook => ebook.author, { eager: true, nullable: true })
+  @OneToMany(() => Ebook, ebook => ebook.author, {nullable: true })
   booksWritten: Ebook[];
-
 }

@@ -1,5 +1,5 @@
 import { Author } from '../../auth/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Vote } from './vote.entity';
 
 @Entity()
@@ -14,7 +14,7 @@ export class Ebook {
   @Column()
   publisher: string;
 
-  @ManyToOne(() => Author, author => author.booksWritten)
+  @ManyToOne(() => Author, author => author.booksWritten, {eager: true})
   @JoinColumn({ name: 'authorId' })
   author: Author;
 
