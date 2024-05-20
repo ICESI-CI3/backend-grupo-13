@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, DeleteResult, In, Repository } from 'typeorm';
+import { Between, DeleteResult, In, Like, Repository } from 'typeorm';
 import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
@@ -309,11 +309,58 @@ export class EbooksService {
   
     return await this.ebooksRepository.save(ebook);
   }
-  
 
   private calculateRating(votes: Vote[]): number {
     const total = votes.reduce((acc, vote) => acc + vote.value, 0);
     return total / votes.length;
   }
-  
+
+  public async findByCategory(category: string, page: number = 1, limit: number = 10): Promise<Ebook[]> {
+    try {
+      return await this.ebooksRepository.find({
+        where: { category },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public async findByAuthor(authorId: string, page: number = 1, limit: number = 10): Promise<Ebook[]> {
+    try {
+      return await this.ebooksRepository.find({
+        where: { author: { id: authorId } },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public async searchByTitle(keyword: string, page: number = 1, limit: number = 10): Promise<Ebook[]> {
+    try {
+      return await this.ebooksRepository.find({
+        where: { title: Like(`%${keyword}%`) },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public async findAllSorted(order: 'ASC' | 'DESC', page: number = 1, limit: number = 10): Promise<Ebook[]> {
+    try {
+      return await this.ebooksRepository.find({
+        order: { rating: order },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
 }
