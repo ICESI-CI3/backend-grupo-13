@@ -39,6 +39,15 @@ export class Ebook {
   @Column('float')
   rating: number;
 
+  @Column({
+    type: 'enum',
+    enum: ['Fantasia', 'Comedia', 'Horror', 'Historia', 'Ciencia Ficcion', 'Romance', 'Misterio']
+  })
+  category: string;
+
+  @Column()
+  ebookCover: string
+
   @OneToMany(() => Vote, vote => vote.ebook, { eager: true })
   votes: Vote[];
 }

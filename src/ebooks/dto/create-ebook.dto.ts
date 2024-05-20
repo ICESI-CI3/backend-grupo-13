@@ -43,4 +43,12 @@ export class CreateEbookDto {
   @IsOptional()
   @IsNumber()
   rating: number;
+
+  @IsNotEmpty()
+  @IsString()
+  category: string;
+
+  @IsNotEmpty()
+  @IsString()
+  ebookCover: string
 }

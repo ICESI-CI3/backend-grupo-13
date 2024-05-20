@@ -11,6 +11,8 @@ export class InfoEbookDto {
     isbn: string;
     version: string;
     rating: number;
+    category:string;
+    ebookCover: string;
     
     constructor(ebook: Ebook) {
         console.log(ebook);
@@ -24,5 +26,7 @@ export class InfoEbookDto {
         this.isbn = ebook.isbn;
         this.version = ebook.version;
         this.rating = ebook.rating;
+        this.category = ebook.category;
+        this.ebookCover = ebook.ebookCover;
     }
 }
