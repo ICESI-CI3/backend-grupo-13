@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, DeleteResult, In, Like, Repository } from 'typeorm';
+import { Between, DeleteResult, ILike, In, Like, Repository } from 'typeorm';
 import { Ebook, EbooksReader } from './entities/ebook.entity';
 import { CreateEbookDto } from './dto/create-ebook.dto';
 import { UpdateEbookDto } from './dto/update-ebook.dto';
@@ -342,7 +342,7 @@ export class EbooksService {
   public async searchByTitle(keyword: string, page: number = 1, limit: number = 10): Promise<Ebook[]> {
     try {
       return await this.ebooksRepository.find({
-        where: { title: Like(`%${keyword}%`) },
+        where: { title: ILike(`%${keyword}%`) },
         skip: (page - 1) * limit,
         take: limit,
       });
