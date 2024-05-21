@@ -54,12 +54,6 @@ export class EbooksController {
     return new VisualizeEbookDto(ebook.title, Buffer.from(ebook.fileData).toString("base64"));
   }
 
-  @Get(':id')
-  public async findByIdAll(@Param('id') id: string): Promise<Ebook> {
-    const ebook = await this.ebooksService.findById(id);
-    return ebook;
-  }
-
   // @Roles(RoleEnum.AUTHOR, RoleEnum.ADMIN)
   @Patch('visualize/:id')
   public async update(@Param('id') id: string, @Body() updateUserDto: UpdateEbookDto): Promise<Ebook> {
