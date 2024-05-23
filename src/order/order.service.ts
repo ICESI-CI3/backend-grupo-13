@@ -9,7 +9,7 @@
   import { AuthService } from '../auth/auth.service';
   import { Ebook } from '../ebooks/entities/ebook.entity';
   import { validateUuid } from '../utils/validateUuid';
-import { ShoppingCart } from './entities/shoppingCart';
+import { ShoppingCart } from './entities/shoppingCart.entity';
 import { UpdateShoppingCartDto } from './dto/update-shopping-cart.dto';
 import { CreateShoppingCartDto } from './dto/create-shopping-cart.dto';
 

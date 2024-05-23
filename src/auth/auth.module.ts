@@ -7,7 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Author, Reader, User } from '../auth/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ShoppingCart } from '../order/entities/shoppingCart'
+import { ShoppingCart } from '../order/entities/shoppingCart.entity'
 
 @Module({
   imports: [
