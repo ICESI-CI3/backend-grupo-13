@@ -34,13 +34,11 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto): Promise<{ access_token: string }> {
-    console.log(createUserDto)
     return this.authService.createUser(createUserDto);
   }
 
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto): Promise<{ access_token: string }> {
-    console.log("Trying to login", loginUserDto.email, loginUserDto.password)
     return this.authService.login(loginUserDto);
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Req, Param, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Req, Param, NotFoundException, Query, Patch, Delete } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -6,6 +6,8 @@ import { RolesGuard } from '../auth/guard/roles.guard';
 import { RoleEnum } from '../auth/enum/role.enum';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { Order } from './entities/order.entity';
+import { UpdateShoppingCartDto } from './dto/update-shopping-cart.dto';
+import { CreateShoppingCartDto } from './dto/create-shopping-cart.dto';
 
 @Controller('/order')
 export class OrderController {
@@ -22,6 +24,23 @@ export class OrderController {
   @Get('/:orderId')
   async getUserOrderById(@Req() req,@Param('orderId') orderId: string): Promise<Order> {
     return await this.orderService.getUserOrderById(req.user.userId, orderId);
+  }
+
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Get('/shoppingcart')
+  findOneShoppingCart(@Req() req) {
+    return this.orderService.findOne(req.user.userId);
+  }
+  
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Patch('/shoppingcart')
+  updateShoppingCart(@Req() req, @Body() updateShoppingCartDto: UpdateShoppingCartDto) {
+    return this.orderService.update(req.user.userId, updateShoppingCartDto);
+  }
+
+  @Delete('/shoppingcart/:id')
+  remove(@Param('id') id: string) {
+    return this.orderService.remove(id);
   }
  
   @UseGuards(AuthGuard('jwt'),RolesGuard)
@@ -60,5 +79,24 @@ export class OrderController {
     const order = this.orderService.createOrder(id,createOrderDto);
     return this.orderService.generatePaymentLink(await order);
   }
+  @Roles(RoleEnum.ADMIN)
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Patch('/shoppingcart/users/:id')
+  updateShoppingCartForUser(@Param('id') id: string, @Body() updateShoppingCartDto: UpdateShoppingCartDto) {
+    return this.orderService.update(id, updateShoppingCartDto);
+  }
 
+  @Roles(RoleEnum.ADMIN)
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Get('/shoppingcart/:id')
+  findOneShoppingCartForUser(@Param('id') id: string) {
+    return this.orderService.findOne(id);
+  }
+
+  @Roles(RoleEnum.ADMIN)
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Get('/shoppingcart')
+  findAllShoppingCart() {
+    return this.orderService.findAll();
+  }
 }
