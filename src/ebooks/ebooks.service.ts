@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DeleteResult, ILike, In, Like, Repository } from 'typeorm';
 import { Ebook, EbooksReader } from './entities/ebook.entity';
@@ -21,11 +21,10 @@ export class EbooksService {
     private readonly wishRepository: Repository<Wish>,
     @InjectRepository(EbooksReader)
     private readonly ebookReaderRepository: Repository<EbooksReader>,
-    @InjectRepository(EbooksReader)
-    private ebooksReaderRepository: Repository<EbooksReader>,
-    private readonly authService: AuthService,
     @InjectRepository(Vote)
-    private readonly votesRepository: Repository<Vote>
+    private readonly votesRepository: Repository<Vote>,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService
   ) { }
 
   public async addToWishlist(dto: WishListDto): Promise<Wish> {

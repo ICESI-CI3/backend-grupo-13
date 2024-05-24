@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnauthorizedException, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
@@ -10,6 +10,7 @@ import { BadRequestException } from '@nestjs/common';
 import { RoleEnum } from './enum/role.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validateUuid } from '../utils/validateUuid';
+import { ShoppingCartService } from 'src/shopping_cart/shopping_cart.service';
 
 
 @Injectable()
@@ -23,6 +24,8 @@ export class AuthService {
     private readonly readerRepository: Repository<Reader>,
     @InjectRepository(Author)
     private readonly authorRepository: Repository<Author>,
+    @Inject(forwardRef(() => ShoppingCartService))
+    private readonly shoppingCartService: ShoppingCartService,
   ) { }
 
 
@@ -73,7 +76,12 @@ export class AuthService {
         email: email,
         role: rol
       });
-      const savedUser = await this.userRepository.save(user);
+      let savedUser = await this.userRepository.save(user);
+      const shoppingCart = await this.shoppingCartService.createShoppingCart(user.id);
+
+      savedUser.shoppingCart = shoppingCart
+
+      savedUser=await this.userRepository.save(savedUser);
 
       await this.addRoleSpecific(role, savedUser.id, createUserDto);
 

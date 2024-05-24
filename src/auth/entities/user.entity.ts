@@ -3,7 +3,7 @@ import { RoleEnum } from "../enum/role.enum";
 import { Order } from "../../order/entities/order.entity";
 import { Vote } from "src/ebooks/entities/vote.entity";
 import { Ebook } from "src/ebooks/entities/ebook.entity";
-import { ShoppingCart } from "../../order/entities/shoppingCart.entity"
+import { ShoppingCart } from "../../shopping_cart/entities/shopping_cart.entity"
 
 @Entity()
 export abstract class User {
@@ -31,6 +31,8 @@ export abstract class User {
   @OneToOne(() => ShoppingCart, shoppingCart => shoppingCart.user)
   @JoinColumn()
   shoppingCart: ShoppingCart;
+
+  
 }
 
 @Entity()

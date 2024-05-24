@@ -2,7 +2,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 
 import { IsArray, IsUUID } from 'class-validator';
-import { CreateShoppingCartDto } from './create-shopping-cart.dto';
+import { CreateShoppingCartDto } from './create-shopping_cart.dto';
 
 export class UpdateShoppingCartDto extends PartialType(CreateShoppingCartDto) {
   @IsArray()

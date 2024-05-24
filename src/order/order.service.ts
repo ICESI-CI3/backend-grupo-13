@@ -9,10 +9,6 @@
   import { AuthService } from '../auth/auth.service';
   import { Ebook } from '../ebooks/entities/ebook.entity';
   import { validateUuid } from '../utils/validateUuid';
-import { ShoppingCart } from './entities/shoppingCart.entity';
-import { UpdateShoppingCartDto } from './dto/update-shopping-cart.dto';
-import { CreateShoppingCartDto } from './dto/create-shopping-cart.dto';
-
 
 @Injectable()
 export class OrderService {
@@ -23,8 +19,6 @@ export class OrderService {
     @Inject(forwardRef(() => PaymentService))
     private readonly paymentService: PaymentService,
     private readonly authService: AuthService,
-    @InjectRepository(ShoppingCart)
-    private shoppingCartRepository: Repository<ShoppingCart>,
   ) {}
 
   async findOrderByReferenceCode(referenceCode: string): Promise<Order | null> {
@@ -140,10 +134,7 @@ export class OrderService {
     }
   }
 
-  async findAll(): Promise<ShoppingCart[]> {
-    return this.shoppingCartRepository.find({ relations: ['user', 'ebooks'] });
-  }
-
+  
   async getUserOrderById(userId: string, orderId: string): Promise<Order> {
     try {
       validateUuid(userId);
@@ -160,45 +151,5 @@ export class OrderService {
           error: `Error finding order: ${error.message}`,
       }, HttpStatus.BAD_REQUEST);
     }
-  }
-
-  async update(id: string, updateShoppingCartDto: UpdateShoppingCartDto): Promise<ShoppingCart> {
-    const { ebookIds } = updateShoppingCartDto;
-
-    const shoppingCart = await this.shoppingCartRepository.findOne({ where: { id }, relations: ['ebooks'] });
-    if (!shoppingCart) {
-      throw new NotFoundException('Shopping Cart not found');
-    }
-
-    if (ebookIds) {
-      const ebooks = await this.ebookService.findBy(ebookIds);
-      if (ebooks.length !== ebookIds.length) {
-        throw new NotFoundException('One or more eBooks not found');
-      }
-      shoppingCart.ebooks = ebooks;
-    }
-
-    return this.shoppingCartRepository.save(shoppingCart);
-  }
-
-  async remove(id: string): Promise<void> {
-    try {
-      const shoppingCart = await this.shoppingCartRepository.findOne({ where: { id }, relations: ['ebooks'] });
-      if (!shoppingCart) {
-        throw new NotFoundException('Shopping Cart not found');
-      }
-
-      shoppingCart.ebooks = [];
-      await this.shoppingCartRepository.save(shoppingCart);
-    } catch (error) {
-      throw new InternalServerErrorException('Error emptying shopping cart');
-    }
-  }
-  async findOne(id: string): Promise<ShoppingCart> {
-    const shoppingCart = await this.shoppingCartRepository.findOne({ where: { id }, relations: ['user','ebooks'] });
-    if (!shoppingCart) {
-      throw new NotFoundException('Shopping Cart not found');
-    }
-    return shoppingCart;
-  }  
+  } 
 }
