@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Req, Param, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Req, Param, NotFoundException, Query, Patch, Delete } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';

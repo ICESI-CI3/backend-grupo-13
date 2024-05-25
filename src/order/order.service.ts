@@ -1,4 +1,4 @@
-  import { HttpException, HttpStatus, Inject, Injectable, forwardRef, UseGuards, Get, Req, Param, NotFoundException } from '@nestjs/common';
+  import { HttpException, HttpStatus, Inject, Injectable, forwardRef, UseGuards, Get, Req, Param, NotFoundException, InternalServerErrorException } from '@nestjs/common';
   import { InjectRepository } from '@nestjs/typeorm';
   import { Order } from './entities/order.entity';
   import { Repository } from 'typeorm';
@@ -9,7 +9,6 @@
   import { AuthService } from '../auth/auth.service';
   import { Ebook } from '../ebooks/entities/ebook.entity';
   import { validateUuid } from '../utils/validateUuid';
-
 
 @Injectable()
 export class OrderService {
@@ -135,7 +134,7 @@ export class OrderService {
     }
   }
 
-
+  
   async getUserOrderById(userId: string, orderId: string): Promise<Order> {
     try {
       validateUuid(userId);
@@ -152,6 +151,5 @@ export class OrderService {
           error: `Error finding order: ${error.message}`,
       }, HttpStatus.BAD_REQUEST);
     }
-  }
-  
+  } 
 }

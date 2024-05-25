@@ -8,11 +8,12 @@ import { Wish } from '../ebooks/entities/wish.entity';
 import { SeederService } from './seed.service';
 import { Transaction } from '../payment/entities/transaction.entity';
 import { Vote } from 'src/ebooks/entities/vote.entity';
+import { ShoppingCart } from 'src/shopping_cart/entities/shopping_cart.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User, Author, Reader,Order, Transaction, Ebook, Wish, Vote,EbooksReader,
+      User, Author, Reader,Order, Transaction, Ebook, Wish, Vote,EbooksReader,ShoppingCart
     ]),
   ],
   providers: [SeederService],
