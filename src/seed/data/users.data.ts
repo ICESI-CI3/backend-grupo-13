@@ -39,7 +39,12 @@ const preUsers = [
         email: 'fHerbert@example.com',
         role: RoleEnum.AUTHOR,
     },
-
+    {
+        username: 'jGrisham',
+        password: 'universalPass123',
+        email: 'jGrisham@example.com',
+        role: RoleEnum.AUTHOR,
+    },
 
 
     {

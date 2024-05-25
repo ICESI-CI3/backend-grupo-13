@@ -39,6 +39,12 @@ const preAuthors = [
         booksWritten: [],
         userId: usersMap["fHerbert"].id
     },
+    {
+        penName: "John Grisham",
+        biography: "John Grisham (Jonesboro, Arkansas, 1955) se dedicaba a la abogacía antes de convertirse en un escritor de éxito mundial. Desde que publicó su primera novela en 1988, ha escrito casi una por año. Todas sin excepción han sido best sellers y ocho de ellas han resultado ser una magnífica fuente de guiones para el cine.\n\nEntre sus obras destacan los siguientes títulos, todos ellos convertidos también en películas de éxito: Tiempo de matar, La tapadera, El informe Pelícano, El cliente, Cámara de gas, Legítima defensa, El jurado. Sus últimas obras publicadas en España son Ajuste de cuentas, La gran estafa, El caso Fitzgerald, El soborno y Un abogado rebelde.",
+        booksWritten: [],
+        userId: usersMap["jGrisham"].id
+    },
 ]
 
 const authors: Author[] = preAuthors.map((author) => {return {id: uuid(), ...author}})
