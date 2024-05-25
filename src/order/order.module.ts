@@ -6,9 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EbooksModule } from '../ebooks/ebooks.module';
 import { AuthModule } from '../auth/auth.module';
 import { PaymentModule } from '../payment/payment.module';
+import { ShoppingCartModule } from 'src/shopping_cart/shopping_cart.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order]),EbooksModule, forwardRef(()=>PaymentModule), AuthModule],
+  imports: [TypeOrmModule.forFeature([Order]),EbooksModule, forwardRef(()=>PaymentModule), forwardRef(() => AuthModule),],
   controllers: [OrderController],
   providers: [OrderService],
   exports: [OrderService]

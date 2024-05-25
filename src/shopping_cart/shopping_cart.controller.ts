@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Put } from '@nestjs/common';
 import { ShoppingCartService } from './shopping_cart.service';
 import { CreateShoppingCartDto } from './dto/create-shopping_cart.dto';
 import { UpdateShoppingCartDto } from './dto/update-shopping_cart.dto';
@@ -14,17 +14,23 @@ export class ShoppingCartController {
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Get('')
   findOneShoppingCart(@Req() req) {
-    return this.shoppingCartService.findOne(req.user.userId);
+    return this.shoppingCartService.findByUserId(req.user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'),RolesGuard)
-  @Patch('')
-  updateShoppingCart(@Req() req, @Body() updateShoppingCartDto: UpdateShoppingCartDto) {
-    return this.shoppingCartService.update(req.user.userId, updateShoppingCartDto);
+  @Get('/buy')
+  buy(@Req() req) {
+    return this.shoppingCartService.findByUserId(req.user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'),RolesGuard)
-  @Delete('/shoppingcart')
+  @Put('')
+  async update(@Req() req, @Body() updateShoppingCartDto: UpdateShoppingCartDto) {
+    return await this.shoppingCartService.update(req.user.userId, updateShoppingCartDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'),RolesGuard)
+  @Delete('')
   remove(@Req() req) {
     return this.shoppingCartService.remove(req.user.userId);
   }
