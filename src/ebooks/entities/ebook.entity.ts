@@ -41,7 +41,7 @@ export class Ebook {
 
   @Column({
     type: 'enum',
-    enum: ['Fantasia', 'Comedia', 'Horror', 'Historia', 'Ciencia Ficcion', 'Romance', 'Misterio']
+    enum: ['Fantasía', 'Comedia', 'Cuentos clásicos', 'Horror', 'Historia', 'Ciencia ficción', 'Romance', 'Thriller']
   })
   category: string;
 

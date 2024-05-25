@@ -1,6 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SeederController } from './seed.controller';
 import { Author, Reader, User } from '../auth/entities/user.entity';
 import { Ebook, EbooksReader } from '../ebooks/entities/ebook.entity';
 import { Order } from '../order/entities/order.entity';
@@ -17,6 +16,6 @@ import { Vote } from 'src/ebooks/entities/vote.entity';
     ]),
   ],
   providers: [SeederService],
-  controllers: [SeederController],
+  controllers: [],
 })
 export class SeederModule {}
