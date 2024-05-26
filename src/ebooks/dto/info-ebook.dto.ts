@@ -3,6 +3,7 @@ import { Ebook } from "../entities/ebook.entity";
 import { InfoAuthorDto } from "./info-author.dto";
 
 export class InfoEbookDto {
+    id: string;
     title: string;
     publisher: string;
     author: InfoAuthorDto;
@@ -17,7 +18,7 @@ export class InfoEbookDto {
     ebookCover: string;
     
     constructor(ebook: Ebook) {
-        console.log(ebook);
+        this.id = ebook.id;
         this.title = ebook.title;
         this.publisher = ebook.publisher;
         this.author = new InfoAuthorDto(ebook.author);
