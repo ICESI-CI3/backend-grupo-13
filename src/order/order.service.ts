@@ -9,15 +9,18 @@
   import { AuthService } from '../auth/auth.service';
   import { Ebook } from '../ebooks/entities/ebook.entity';
   import { validateUuid } from '../utils/validateUuid';
+import { ShoppingCart } from 'src/shopping_cart/entities/shopping_cart.entity';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+    
     private readonly ebookService: EbooksService,
     @Inject(forwardRef(() => PaymentService))
     private readonly paymentService: PaymentService,
+    @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
 
@@ -40,6 +43,20 @@ export class OrderService {
 
     return await this.paymentService.generatePaymentLink(transactionDto);
 
+  }
+  async transform(shoppingCart: ShoppingCart): Promise<CreateOrderDto> {
+    const ebookIds = shoppingCart.ebooks.map(ebook => ebook.id);
+  
+    const createOrderDto: CreateOrderDto = {
+      ebookIds
+    };
+  
+    return createOrderDto;
+  }
+
+  public async buy(userId:string,shoppingCart : ShoppingCart): Promise<String>{
+    const order = this.createOrder(userId,await this.transform(shoppingCart))
+    return this.generatePaymentLink(await order)
   }
 
   async createOrder(userId:string,createOrderDto: CreateOrderDto): Promise<Order> {

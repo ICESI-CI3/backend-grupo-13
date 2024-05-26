@@ -5,6 +5,8 @@ import { ShoppingCart } from './entities/shopping_cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EbooksService } from 'src/ebooks/ebooks.service';
+import { AuthService } from 'src/auth/auth.service';
+import { OrderService } from 'src/order/order.service';
 
 @Injectable()
 export class ShoppingCartService {
@@ -12,7 +14,10 @@ export class ShoppingCartService {
   constructor(@InjectRepository(ShoppingCart)
   private readonly shoppingCartRepository: Repository<ShoppingCart>,
   @Inject(forwardRef(() => EbooksService))
-  private readonly ebookService: EbooksService){}
+  private readonly ebookService: EbooksService,
+  @Inject(forwardRef(() => OrderService))
+  private readonly orderService: OrderService,
+  ){}
   
   
   async createShoppingCart(userId: string): Promise<ShoppingCart> {
@@ -32,22 +37,37 @@ export class ShoppingCartService {
     }
     return shoppingCart;
   } 
+  async findByUserId(userId: string): Promise<ShoppingCart> {
+    const shoppingCart = await this.shoppingCartRepository.findOne({
+      where: {
+        user: { id: userId }
+      },
+      relations: ['user', 'ebooks'], 
+    });
 
-  
-  async update(id: string, updateShoppingCartDto: UpdateShoppingCartDto): Promise<ShoppingCart> {
-    const { ebookIds } = updateShoppingCartDto;
-
-    const shoppingCart = await this.shoppingCartRepository.findOne({ where: { id }, relations: ['ebooks'] });
     if (!shoppingCart) {
-      throw new NotFoundException('Shopping Cart not found');
+      throw new NotFoundException('Shopping cart not found for user');
     }
 
-    if (ebookIds) {
-      const ebooks = await this.ebookService.findBy(ebookIds);
-      if (ebooks.length !== ebookIds.length) {
-        throw new NotFoundException('One or more eBooks not found');
-      }
-      shoppingCart.ebooks = ebooks;
+    return shoppingCart;
+  }
+  
+  async update(userId: string, updateShoppingCartDto: UpdateShoppingCartDto): Promise<ShoppingCart> {
+    const { ebookIds, operation } = updateShoppingCartDto;
+
+    const shoppingCart = await this.findByUserId(userId);
+    const ebooks = await this.ebookService.findBy(ebookIds);
+
+    if (ebooks.length !== ebookIds.length) {
+      throw new NotFoundException('One or more eBooks not found');
+    }
+
+    if (operation === 'add') {
+      shoppingCart.ebooks = [...shoppingCart.ebooks, ...ebooks];
+    } else if (operation === 'remove') {
+      shoppingCart.ebooks = shoppingCart.ebooks.filter(ebook => !ebookIds.includes(ebook.id));
+    } else {
+      throw new Error('Invalid operation');
     }
 
     return this.shoppingCartRepository.save(shoppingCart);
@@ -55,8 +75,8 @@ export class ShoppingCartService {
 
   async remove(id: string): Promise<void> {
     try {
-      const shoppingCart = await this.shoppingCartRepository.findOne({ where: { id }, relations: ['ebooks'] });
-      if (!shoppingCart) {
+      const shoppingCart = await this.findByUserId(id);
+            if (!shoppingCart) {
         throw new NotFoundException('Shopping Cart not found');
       }
 
@@ -65,5 +85,8 @@ export class ShoppingCartService {
     } catch (error) {
       throw new InternalServerErrorException('Error emptying shopping cart');
     }
+  }
+  async buy(userId: string):Promise<String>{
+    return await this.orderService.buy(userId,await this.findByUserId(userId));
   }
 }

@@ -11,12 +11,7 @@ import { Order } from './entities/order.entity';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @UseGuards(AuthGuard('jwt'),RolesGuard)
-  @Post('create')
-  async create(@Req() req,@Body() createOrderDto: CreateOrderDto) {
-    const order = this.orderService.createOrder(req.user.userId,createOrderDto);
-    return await this.orderService.generatePaymentLink(await order);
-  }
+
   
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Get('/:orderId')

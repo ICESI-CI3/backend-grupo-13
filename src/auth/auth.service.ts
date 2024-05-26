@@ -138,6 +138,20 @@ export class AuthService {
     }
   }
 
+  public async getUserShoppingcartById(id: string): Promise<User | undefined> {
+    try {
+        validateUuid(id);
+
+        const user = await this.userRepository.findOne({  where: { id: id },   relations: ['shoppingCart']});
+        if (!user) {
+            throw new Error(`User with ID ${id} not found.`);
+        }
+        return user;
+    } catch (error) {
+        throw new NotFoundException(`Error finding user: ${error.message}`);
+    }
+  }
+
   async getReaderByUser(userId: string) {
     try{
       validateUuid(userId);

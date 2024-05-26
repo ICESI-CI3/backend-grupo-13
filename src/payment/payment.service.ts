@@ -10,6 +10,7 @@ import { OrderService } from '../order/order.service';
 import { Order } from '../order/entities/order.entity';
 import { validateUuid } from '../utils/validateUuid';
 import { Response } from 'express';
+import { ShoppingCartService } from 'src/shopping_cart/shopping_cart.service';
 
 
 @Injectable()
@@ -37,6 +38,8 @@ export class PaymentService {
     private configService: ConfigService,
     @Inject(forwardRef(() => OrderService))
     private readonly orderService: OrderService,
+    @Inject(forwardRef(() => ShoppingCartService))
+    private readonly shoppingCartService: ShoppingCartService,
   ) {
     this.apiKey = this.configService.get<string>('PAYU_API_KEY');
     this.merchantId = this.configService.get<string>('PAYU_MERCHANT_ID');
@@ -185,6 +188,7 @@ export class PaymentService {
           throw new Error('Order not found');
         }
         await this.processOrderBooks(order);
+        await this.shoppingCartService.remove(order.user.id)
         return  res.json(transaction);
       }
       return  res.json({message: 'Transaccion no aprobada'});
@@ -193,23 +197,4 @@ export class PaymentService {
     }
   }
 
-  async handleConfirmation(transactionData: CreateTransactionDto, res: Response) {
-    console.log("confirmation")
-    try {
-      if (transactionData.message === 'APPROVED') {
-        const transaction = await this.createTransaction(transactionData);
-        const order = await this.findOrderByReferenceCode(transactionData.referenceCode);
-
-        if (!order) {
-          throw new Error('Order not found');
-        }
-        await this.processOrderBooks(order);
-        return  res.json(transaction);
-      }
-      return  res.json({message: 'Transaccion no aprovada'});
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to process transaction', details: error.message });
-    }
-  }
-    
 }

@@ -40,7 +40,7 @@ export class PaymentController {
   @Get('payu-confirmation')
   async handleConfirmation(@Query() transactionData: CreateTransactionDto, @Res() res: Response) {
     console.log("confirmation")
-    return await this.paymentService.handleConfirmation(transactionData,res);
+    return await this.paymentService.handleResponse(transactionData,res);
   }
   
   @UseGuards(AuthGuard('jwt'),RolesGuard)
