@@ -105,11 +105,21 @@ export class EbooksController {
     return this.ebooksService.findByCategory(category, pageNumber, limitNumber);
   }
 
+  @Get('category/amount/:category')
+  public async getNumberByCategory(@Param('category') category: string): Promise<number> {
+    return this.ebooksService.getNumberByCategory(category);
+  }
+
   @Get('/author/:authorId')
   public async findByAuthor(@Param('authorId') authorId: string, @Query('page') page: string, @Query('limit') limit: string): Promise<Ebook[]> {
     const pageNumber = parseInt(page, 10) || 1;
     const limitNumber = parseInt(limit, 10) || 12;
     return this.ebooksService.findByAuthor(authorId, pageNumber, limitNumber);
+  }
+
+  @Get('author/amount/:authorId')
+  public async getNumberByAuthor(@Param('authorId') authorId: string): Promise<number> {
+    return this.ebooksService.getNumberByAuthor(authorId);
   }
 
   @Get('/search/:keyword')
@@ -119,6 +129,11 @@ export class EbooksController {
     return this.ebooksService.searchByTitle(keyword, pageNumber, limitNumber);
   }
 
+  @Get('search/amount/:keyword')
+  public async getNumberBySearch(@Param('keyword') keyword: string): Promise<number> {
+    return this.ebooksService.getNumberBySearch(keyword);
+  }
+
   @Get('/sorted/:order')
   public async findAllSorted(@Param('order') order: number, @Query('page') page: string, @Query('limit') limit: string): Promise<Ebook[]> {
     const pageNumber = parseInt(page, 10) || 1;
@@ -126,4 +141,11 @@ export class EbooksController {
     const sortOrder = order === 1 ? 'ASC' : 'DESC';
     return this.ebooksService.findAllSorted(sortOrder, pageNumber, limitNumber);
   }
+
+  @Get('sorted/amount/:order')
+  public async getNumberBySorted(@Param('order') order: number): Promise<number> {
+    const sortOrder = order === 1 ? 'ASC' : 'DESC';
+    return this.ebooksService.getNumberBySorted(sortOrder);
+  }
+
 }

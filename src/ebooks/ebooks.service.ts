@@ -370,4 +370,45 @@ export class EbooksService {
     }
   }
 
+  public async getNumberByCategory(category: string):Promise<number> {
+    try {
+      return await this.ebooksRepository.count({
+        where: { category }
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public async getNumberByAuthor(authorId: string):Promise<number> {
+    try {
+      return await this.ebooksRepository.count({
+        where: { author: { id: authorId }  }
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public async getNumberBySearch(keyword: string): Promise<number> {
+    try {
+      return await this.ebooksRepository.count({
+        where: { title: ILike(`%${keyword}%`) }
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public async getNumberBySorted(order: 'ASC' | 'DESC'): Promise<number> {
+    try {
+      return await this.ebooksRepository.count({
+        order: { rating: order }
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
 }
