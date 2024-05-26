@@ -149,6 +149,14 @@ export class EbooksService {
     }
   }
 
+  public async getNumberBooks(): Promise<number> {
+    try {
+      return await this.ebooksRepository.count();
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   public async findById(id: string): Promise<Ebook> {
     try {
 
