@@ -20,7 +20,7 @@ export class ShoppingCartController {
   @UseGuards(AuthGuard('jwt'),RolesGuard)
   @Get('/buy')
   buy(@Req() req) {
-    return this.shoppingCartService.findByUserId(req.user.userId);
+    return this.shoppingCartService.buy(req.user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'),RolesGuard)

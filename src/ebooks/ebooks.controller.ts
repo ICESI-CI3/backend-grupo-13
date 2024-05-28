@@ -18,8 +18,8 @@ import { VoteDto } from './dto/create-vote.dto';
 export class EbooksController {
   constructor(private readonly ebooksService: EbooksService) { }
 
-  //@UseGuards(AuthGuard('jwt'), RolesGuard)
-  //@Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleEnum.AUTHOR, RoleEnum.USER, RoleEnum.ADMIN)
   @Post('/vote/:ebookId')
   async addVote(@Param('ebookId') ebookId: string, @Body() voteDto: VoteDto, @Req() req) {
     const userId = req.user.userId;
@@ -81,7 +81,7 @@ export class EbooksController {
     return this.ebooksService.assignEbookToReader(createEbookReaderDto);
   }
 
-  //@UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('/mybooks')
   public async getMyBooks(@Req() req, @Query('page') page: string, @Query('limit') limit: string,): Promise<Ebook[]> {
     const pageNumber = parseInt(page, 10) || 1;
