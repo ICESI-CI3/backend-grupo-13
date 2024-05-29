@@ -14,6 +14,7 @@ export class InfoEbookDto {
     isbn: string;
     version: string;
     rating: number;
+    numVotes: number;
     category:string;
     ebookCover: string;
     
@@ -29,6 +30,7 @@ export class InfoEbookDto {
         this.isbn = ebook.isbn;
         this.version = ebook.version;
         this.rating = ebook.rating;
+        this.numVotes = ebook.votes.length;
         this.category = ebook.category;
         this.ebookCover = ebook.ebookCover;
     }

@@ -98,6 +98,12 @@ export class EbooksController {
     return this.ebooksService.findAllEbooksByReader(readerId, pageNumber, limitNumber);
   }
 
+  @Get('/check/:readerId/:bookId')
+  public async readerHasThisBook(@Param('readerId') readerId: string,@Param('bookId') bookId: string): Promise<boolean> {
+
+    return this.ebooksService.readerHasThisBook(readerId, bookId);
+  }
+
   @Get('/category/:category')
   public async findByCategory(@Param('category') category: string, @Query('page') page: string, @Query('limit') limit: string): Promise<Ebook[]> {
     const pageNumber = parseInt(page, 10) || 1;

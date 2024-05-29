@@ -277,6 +277,21 @@ export class EbooksService {
     }
   }
 
+  async readerHasThisBook(userId: string, bookId: string): Promise<boolean> {
+    const existingAssignment = await this.ebookReaderRepository.findOne({
+      where: {
+        readerId: userId,
+        ebookId: bookId,
+      },
+    });
+  
+    if (existingAssignment) {
+      return true;
+    }
+
+    return false;
+  }
+
   async findBy(ids: string[]): Promise<Ebook[]> {
     return await this.ebooksRepository.find({
       where: { id: In(ids) }
@@ -307,12 +322,12 @@ export class EbooksService {
       vote.value = value;
     } else {
       vote = this.votesRepository.create({ value, ebook, user });
+      ebook.votes.push(vote); 
     }
 
     await this.votesRepository.save(vote);
   
-    const votes = await this.votesRepository.find({ where: { ebook: { id: ebookId } } });
-    ebook.rating = this.calculateRating(votes);
+    ebook.rating = this.calculateRating(ebook.votes);
   
     return await this.ebooksRepository.save(ebook);
   }

@@ -9,7 +9,7 @@ export class Vote {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('float')
   value: number;
 
   @ManyToOne(() => User)
