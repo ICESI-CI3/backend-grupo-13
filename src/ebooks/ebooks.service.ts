@@ -298,7 +298,7 @@ export class EbooksService {
     });
   }
 
-  async addVote(userId: string, ebookId: string, value: number): Promise<Ebook> {
+  async addVote(userId: string, ebookId: string, value: number): Promise<{ratingg: number, votesCount: number}> {
     if (typeof value !== 'number' || isNaN(value)) {
       throw new BadRequestException('Invalid value');
     }
@@ -307,7 +307,7 @@ export class EbooksService {
       throw new NotFoundException('User not found');
     }
   
-    const ebook = await this.ebooksRepository.findOne({ where: { id: ebookId }, relations: ['votes'] });
+    const ebook = await this.ebooksRepository.findOne({ where: { id: ebookId }, relations: ['votes', 'votes.user'] });
     if (!ebook) {
       throw new NotFoundException('Ebook not found');
     }
@@ -316,21 +316,28 @@ export class EbooksService {
     if (!ownership) {
       throw new ForbiddenException('You do not own this ebook');
     }
-  
-    let vote = await this.votesRepository.findOne({ where: { user: { id: userId }, ebook: { id: ebookId } } });
+    let vote = ebook.votes.find(v => v.user && v.user.id === userId);
     if (vote) {
-      vote.value = value;
+      vote.value = value; 
     } else {
       vote = this.votesRepository.create({ value, ebook, user });
-      ebook.votes.push(vote); 
+      ebook.votes.push(vote);
     }
 
     await this.votesRepository.save(vote);
-  
+    
     ebook.rating = this.calculateRating(ebook.votes);
+
+    
+    await this.ebooksRepository.save(ebook);
   
-    return await this.ebooksRepository.save(ebook);
-  }
+    return {
+        ratingg: ebook.rating, 
+        votesCount: ebook.votes.length
+    };
+}
+
+
 
   private calculateRating(votes: Vote[]): number {
     const total = votes.reduce((acc, vote) => acc + vote.value, 0);
