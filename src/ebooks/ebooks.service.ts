@@ -368,6 +368,22 @@ export class EbooksService {
     }
   }
 
+  public async checkAuthorBooks(authorId: string, ebookId: string): Promise<boolean> {
+    try {
+        const books = await this.ebooksRepository.find({
+            where: { 
+                author: { id: authorId },
+                id: ebookId
+            }
+        });
+
+        return books.length > 0;
+    } catch (error) {
+        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
   public async searchByTitle(keyword: string, page: number = 1, limit: number = 10): Promise<Ebook[]> {
     try {
       return await this.ebooksRepository.find({

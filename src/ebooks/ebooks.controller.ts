@@ -123,6 +123,11 @@ export class EbooksController {
     return this.ebooksService.findByAuthor(authorId, pageNumber, limitNumber);
   }
 
+  @Get('/checkAuthor/:authorId/:ebookId')
+  public async checkAuthorBooks(@Param('authorId') authorId: string,@Param('ebookId') ebookId: string): Promise<boolean> {
+    return this.ebooksService.checkAuthorBooks(authorId, ebookId);
+  }
+
   @Get('author/amount/:authorId')
   public async getNumberByAuthor(@Param('authorId') authorId: string): Promise<number> {
     return this.ebooksService.getNumberByAuthor(authorId);
