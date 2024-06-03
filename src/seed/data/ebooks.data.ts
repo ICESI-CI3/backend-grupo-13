@@ -518,5 +518,5 @@ const preEbooks = [
     },
 ]
 978-1-23-456789-0
-const ebooks: Ebook[] = preEbooks.map((ebook, index) => {return {id: uuid(), ...ebook, isbn: (9781234567890+index).toString().replace(/(\d{3})(\d{1})(\d{2})(\d{6})(\d{1})/, '$1-$2-$3-$4-$5'), ebookCover: ("_" + ebook.ebookCover)}});
+const ebooks: Ebook[] = preEbooks.map((ebook, index) => {return {id: uuid(), ...ebook, isbn: (9781234567890+index).toString().replace(/(\d{3})(\d{1})(\d{2})(\d{6})(\d{1})/, '$1-$2-$3-$4-$5'), ebookCover: ("_" + ebook.ebookCover), fileData: "_testEbook.epub"}});
 export default ebooks;
