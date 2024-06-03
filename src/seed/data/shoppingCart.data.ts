@@ -12,6 +12,40 @@ const preShoppingCarts = [
         user: usersMap["user2"],
         ebooks: [ebooks[11]]
     }
+    ,
+    {
+        user: usersMap["gMartin"],
+        ebooks: []
+    },
+    {
+        user: usersMap["jRowling"],
+        ebooks: []
+    },
+    {
+        user: usersMap["jGrisham"],
+        ebooks: []
+    },
+    {
+        user: usersMap["jTolkien"],
+        ebooks: []
+    },
+    {
+        user: usersMap["mCervantes"],
+        ebooks: []
+    },
+    {
+        user: usersMap["fHerbert"],
+        ebooks: []
+    },
+    {
+        user: usersMap["sKing"],
+        ebooks: []
+    }
+    ,
+    {
+        user: usersMap["sKing"],
+        ebooks: []
+    }
 ];
 
 const shoppingCarts: ShoppingCart[] = preShoppingCarts.map((cart) => {return {id: uuid(), ...cart}})

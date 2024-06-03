@@ -13,6 +13,7 @@ import { ShoppingCart } from 'src/shopping_cart/entities/shopping_cart.entity';
 import users from './data/users.data';
 import authors, { authorsMap } from './data/authors.data';
 import ebooks from './data/ebooks.data';
+import ebooksReader from './data/ebooksReader.data';
 import readers from './data/readers.data';
 import orders from './data/orders.data';
 import transactions from './data/transactions.data';
@@ -34,7 +35,7 @@ export class SeederService implements OnApplicationBootstrap {
   ) { }
 
   async onApplicationBootstrap(): Promise<void> {
-    //await this.seedData();
+    await this.seedData();
   }
 
   async seedData() {
@@ -53,6 +54,10 @@ export class SeederService implements OnApplicationBootstrap {
 
       await Promise.all(ebooks.map(async (ebook) => {
         await this.ebookRepository.save(ebook);
+      }));
+
+      await Promise.all(ebooksReader.map(async (ebook) => {
+        await this.ebookReaderRepository.save(ebook);
       }));
 
       await Promise.all(shoppingCarts.map(async (cart) => {

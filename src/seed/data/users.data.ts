@@ -60,6 +60,20 @@ const preUsers = [
         email: 'user2@example.com',
         role: RoleEnum.USER,
     }
+    ,
+    {
+        username: 'Admin',
+        password: 'universalPass123',
+        email: 'Admin@example.com',
+        role: RoleEnum.ADMIN,
+    }
+    ,
+    {
+        username: 'AuthorAdmin',
+        password: 'universalPass123',
+        email: 'AuthorAdmin@example.com',
+        role: RoleEnum.AUTHOR,
+    }
 ];
 
 const users: User[] = preUsers.map((user) => { return { id: uuid(), orders: [], votes: [], shoppingCart: null, ...user, password:  bcrypt.hashSync(user.password, 10) } })
