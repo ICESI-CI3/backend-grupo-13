@@ -177,7 +177,6 @@ export class PaymentService {
   }
 
   async handleResponse(transactionData: CreateTransactionDto, res: Response){
-    console.log("Response")
     try {
       if (transactionData.message === 'APPROVED') {
         const order = await this.findOrderByReferenceCode(transactionData.referenceCode);

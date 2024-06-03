@@ -100,7 +100,6 @@ export class EbooksService {
     try {
       const userId = createEbookDto.authorId;
       validateUuid(userId);
-      console.log(userId);
 
       const ebookExists = await this.findByIsbn(createEbookDto.isbn);
 

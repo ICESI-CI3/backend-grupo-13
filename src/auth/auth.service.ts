@@ -45,7 +45,6 @@ export class AuthService {
   }
   async createUser(createUserDto: CreateUserDto): Promise<{ access_token: string }> {
     try {
-      console.log("opo")
       const { password, email, role, ...userData } = createUserDto;
 
       const existingUser = await this.userRepository.findOne({ where: { email } });
@@ -56,8 +55,6 @@ export class AuthService {
       const hashedPassword = bcrypt.hashSync(password, 10);
 
       let rol = await this.getRole(role);
-
-      console.log("aaaa")
 
       if(rol==RoleEnum.USER){
         if(createUserDto.favoriteGenre == null){
